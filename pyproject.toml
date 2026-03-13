@@ -18,7 +18,10 @@ classifiers = [
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "equinox>=0.13.6",
     "fastapi==0.115.6",
+    "ipykernel>=7.2.0",
+    "jax>=0.9.1",
     "torch==2.6.0",
     "typer==0.15.1",
     "uvicorn==0.34.0",
