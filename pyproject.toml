@@ -22,7 +22,9 @@ dependencies = [
     "fastapi==0.115.6",
     "ipykernel>=7.2.0",
     "jax>=0.9.1",
+    "optax>=0.2.7",
     "torch==2.6.0",
+    "torchvision>=0.21.0",
     "typer==0.15.1",
     "uvicorn==0.34.0",
 ]
