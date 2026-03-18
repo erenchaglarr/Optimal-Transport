@@ -1,6 +1,6 @@
 from torch.utils.data import Dataset
 
-from optimaltransport.dataloader import MyDataset
+from optimaltransport.data import MyDataset
 
 
 def test_my_dataset():
