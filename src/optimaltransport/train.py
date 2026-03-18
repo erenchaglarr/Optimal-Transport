@@ -1,5 +1,5 @@
 from optimaltransport.model import Model
-from optimaltransport.data import MyDataset
+from optimaltransport.dataloader import MyDataset
 
 def train():
     dataset = MyDataset("data/raw")
