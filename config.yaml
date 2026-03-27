@@ -1,3 +1,24 @@
-#config.yaml
+data:
+  root: "./data"
+  download: true
+
 hyperparameters:
-  None right now.
+  hidden_dim: 392
+  latent_dim: 2
+  learning_rate: 0.001
+  batch_size: 64
+  num_epochs: 20
+
+folds:
+  num_folds: 10
+
+training:
+  seed: 42
+  num_workers: 0
+
+paths:
+  model_dir: "./models"
+  final_model_name: "final_autoencoder.eqx"
+
+visualization:
+  num_examples: 5
