@@ -6,6 +6,7 @@ import jax
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import matplotlib.pyplot as plt
 import numpy as np
+import jax.numpy as jnp
 
 from .save import load_checkpoint
 from .data import get_mnist_dataset, make_loader
@@ -73,6 +74,33 @@ def plot_latent_space(model, loader, title="2D Latent Space"):
     plt.show()
 
 
+def plot_latent_fortnite(model, loader, title="2D Latent Space fortnit"):
+    all_z = []
+    all_y = []
+
+    for x_batch_torch, y_batch_torch, in loader:
+        x_batch = torch_batch_to_jax(x_batch_torch)
+        y_batch = torch_batch_to_jax(y_batch_torch)
+        filter = jnp.logical_or((y_batch == 1), (y_batch == 2))
+        x_batch = x_batch[filter]
+        y_batch = y_batch[filter]
+        z_batch = jax.vmap(model.encoder)(x_batch)
+
+        all_z.append(np.array(z_batch))
+        all_y.append(np.array(y_batch))
+
+    all_z = np.concatenate(all_z, axis=0)
+    all_y = np.concatenate(all_y, axis=0)
+
+    plt.figure(figsize=(7, 7))
+    plt.scatter(all_z[:, 0], all_z[:, 1], c=all_y, cmap="tab10", s=8)
+    plt.xlabel("z1")
+    plt.ylabel("z2")
+    plt.title(title)
+    plt.colorbar()
+    plt.show()
+
+
 def plot_reconstructions(model, loader, n_examples=5):
     x_batch_torch, y_batch = next(iter(loader))
     x_batch = torch_batch_to_jax(x_batch_torch)
@@ -95,7 +123,7 @@ def plot_reconstructions(model, loader, n_examples=5):
 
 def visualize_checkpoint(config, checkpoint_path=None, split="train"):
     if checkpoint_path is None:
-        checkpoint_path = Path(config.paths.model_dir) / config.paths.best_model_name
+        checkpoint_path = Path(config.paths.model_dir) / config.paths.final_model_name
 
     model, _ = load_checkpoint(checkpoint_path)
 
@@ -112,19 +140,22 @@ def visualize_checkpoint(config, checkpoint_path=None, split="train"):
         num_workers=int(config.training.num_workers),
     )
 
-    plot_latent_space(model, loader, title=f"2D Latent Space ({split} split)")
-    plot_reconstructions(
-        model,
-        loader,
-        n_examples=int(config.visualization.num_examples),
+    plot_latent_fortnite(model, loader, title="2D Latent Space fortnit")
+
+#     plot_latent_space(model, loader, title=f"2D Latent Space ({split} split)")
+#     plot_reconstructions(
+#         model,
+#         loader,
+#         n_examples=int(config.visualization.num_examples),
         
-    )
-    plot_latent_space_with_images(
-    model,
-    loader,
-    max_points=1000,
-    zoom=0.4,
-    title=f"Latent Space with Images ({split} split)",
-)
+#     )
+#     plot_latent_space_with_images(
+#     model,
+#     loader,
+#     max_points=1000,
+#     zoom=0.4,
+#     title=f"Latent Space with Images ({split} split)",
+# )
+
     
-    
+
