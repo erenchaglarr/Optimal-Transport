@@ -22,5 +22,5 @@ def sinkhorn(a, b, C, eps=0.1, min_error=0.1, max_iters=200):
     (u, v) = jax.lax.fori_loop(0, max_iters, do_iteration, (u, v))
 
     P = jnp.diag(u) @ K @ jnp.diag(v)
-    return u,v
+    return u,v , P 
 
