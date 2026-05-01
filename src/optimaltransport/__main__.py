@@ -7,7 +7,7 @@ from omegaconf import OmegaConf
 from .evaluate import evaluate_checkpoint
 from .visualize import visualize_checkpoint
 from .train import run_training_pipeline
-
+from .sinkhorn2_eletric_bugaloo import cost_matrix
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -15,7 +15,7 @@ def parse_args():
     parser.add_argument(
         "--mode",
         type=str,
-        choices=["train", "evaluate", "visualize", "all"],
+        choices=["train", "evaluate", "visualize", "all" , "hehe"],
         default="all",
     )
     parser.add_argument("--checkpoint", type=str, default=None)
@@ -52,6 +52,14 @@ def main():
             checkpoint_path=checkpoint_path,
             split=vis_split,
         )
+    if args.mode in {"hehe"}:
+        cost_matrix(
+            config=config,
+            checkpoint_path=checkpoint_path,
+            split= "train",
+        )
+
+
 
 
 if __name__ == "__main__":
