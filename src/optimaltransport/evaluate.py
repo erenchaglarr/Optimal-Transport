@@ -6,7 +6,7 @@ import equinox as eqx
 import numpy as np
 
 from .save import load_checkpoint
-from .data import get_mnist_dataset, make_loader
+from .data import get_mnist_dataset, make_loader, get_labels
 from .lossfn import reconstruction_mse_loss, torch_batch_to_jax
 
 
@@ -57,3 +57,32 @@ def evaluate_checkpoint(config, checkpoint_path=None, split="test"):
         "split": split,
         **metrics,
     }
+
+def run_sinkhorn(config, class_a, class_b):
+    model, _ = load_checkpoint(checkpoint_path)
+    dataset = get_mnist_dataset(
+        data_root=config.data.root,
+        train=False,
+        download=bool(config.data.download),
+    )
+    labels = get_labels(dataset)
+    dataset_tensor = dataset.data
+    class_a_x = dataset_tensor[labels == class_a]
+    class_b_x = dataset_tensor[labels == class_b]
+    class_a_z = jax.vmap(model.encoder)(class_a_x)
+    class_b_z = jax.vmap(model.encoder)(class_b_x)
+    a_n, b_n  = len(class_a_z), len(class_b_z)
+    a = jnp.ones(a_n)
+    b = jnp.ones(b_n) * (b_n / a_n)
+
+    def c(az, bz):
+        return sqrt(sum((azi-bzi)**2 for (azi, bzi) in zip(az, bz)))
+
+    C = jnp.asarray([[c(az[i], bz[j])
+                           for i in range(a_n)]
+                          for j in range(b_n)])
+
+    P, u, v = sinkhorn(a, b, C)
+
+    xhat = (dataset_tensor[0])
+
