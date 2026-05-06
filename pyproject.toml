@@ -31,6 +31,12 @@ dependencies = [
     "typer==0.15.1",
     "uvicorn==0.34.0",
 ]
+[project.optional-dependencies]
+
+cuda13 = [
+
+        "jax[cuda12]>=0.9.1",
+]
 
 [dependency-groups]
 dev = [
