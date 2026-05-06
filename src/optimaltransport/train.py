@@ -272,8 +272,10 @@ def train_full_model(config):
         "final_train_loss": float(train_loss_history[-1]),
     }
 
-
 def run_training_pipeline(config):
+    print("JAX devices:", jax.devices())
+    print("JAX default backend:", jax.default_backend())
+
     cv_results = cross_validate(config)
     final_results = train_full_model(config)
 

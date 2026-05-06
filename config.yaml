@@ -4,10 +4,10 @@ data:
 
 hyperparameters:
   hidden_dim: 392
-  latent_dim: 2
+  latent_dim: 1
   learning_rate: 0.001
   batch_size: 64
-  num_epochs: 20
+  num_epochs: 50
 
 folds:
   num_folds: 10
@@ -18,7 +18,7 @@ training:
 
 paths:
   model_dir: "./models"
-  final_model_name: "best_autoencoder.eqx"
+  final_model_name: "latent2.eqx"
 
 visualization:
-  num_examples: 5
+  num_examples: 5 

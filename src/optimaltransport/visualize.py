@@ -142,7 +142,7 @@ def visualize_checkpoint(config, checkpoint_path=None, split="train"):
 
     plot_latent_fortnite(model, loader, title="2D Latent Space fortnit")
 
-#     plot_latent_space(model, loader, title=f"2D Latent Space ({split} split)")
+    plot_latent_space(model, loader, title=f"2D Latent Space ({split} split)")
 #     plot_reconstructions(
 #         model,
 #         loader,
