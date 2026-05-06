@@ -4,7 +4,7 @@ data:
 
 hyperparameters:
   hidden_dim: 392
-  latent_dim: 1
+  latent_dim: 2
   learning_rate: 0.001
   batch_size: 64
   num_epochs: 50
