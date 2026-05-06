@@ -7,6 +7,7 @@ from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import matplotlib.pyplot as plt
 import numpy as np
 import jax.numpy as jnp
+from sklearn.manifold import TSNE
 
 from .data import get_mnist_dataset, get_labels
 from .save import load_checkpoint
@@ -45,8 +46,34 @@ def cost_matrix(config,  checkpoint_path=None, split="train"):
     row_mass = jnp.maximum(row_mass, 1e-8)  # avoid divide-by-zero
 
     za_moved = (P @ zb) / row_mass
+    za_np = np.array(za)
+    zb_np = np.array(zb)
+    za_moved_np = np.array(za_moved)
 
-    i = 11
+    # combined = np.concatenate(
+    #     [
+    #         za_np,
+    #         zb_np,
+    #         za_moved_np,
+    #     ],
+    #     axis=0,
+    # )
+
+    # tsne = TSNE(
+    #     n_components=2,
+    #     perplexity=30,
+    #     learning_rate="auto",
+    #     init="pca",
+    #     random_state=42,
+    # )
+
+    # combined_tsne = tsne.fit_transform(combined)
+
+    # za_tsne = combined_tsne[:len(za_np)]
+    # zb_tsne = combined_tsne[len(za_np):len(za_np) + len(zb_np)]
+    # za_moved_tsne = combined_tsne[len(za_np) + len(zb_np):] 
+
+    i = 105
     z_old = za[i]
     z_new = za_moved[i]
 
@@ -68,7 +95,6 @@ def cost_matrix(config,  checkpoint_path=None, split="train"):
     plt.scatter(zb_np[:, 0], zb_np[:, 1], s=8, alpha=0.4, label="digit 2 latent points")
 
     n_arrows = min(50, len(za_np))
-
     for i in range(n_arrows):
         plt.arrow(
             za_np[i, 0],
@@ -92,7 +118,67 @@ def cost_matrix(config,  checkpoint_path=None, split="train"):
     plt.axis("equal")
     plt.show()
 
+    # plt.figure(figsize=(8, 7))
 
+    # plt.scatter(
+    #     za_tsne[:, 0],
+    #     za_tsne[:, 1],
+    #     s=8,
+    #     alpha=0.4,
+    #     label="digit 1",
+    # )
+
+    # plt.scatter(
+    #     zb_tsne[:, 0],
+    #     zb_tsne[:, 1],
+    #     s=8,
+    #     alpha=0.4,
+    #     label="digit 2",
+    # )
+
+    # plt.scatter(
+    #     za_moved_tsne[:, 0],
+    #     za_moved_tsne[:, 1],
+    #     s=8,
+    #     alpha=0.4,
+    #     label="transported 1 → 2",
+    # )
+
+    # n_arrows = min(50, len(za_tsne))
+
+    # for k in range(n_arrows):
+    #     plt.arrow(
+    #         za_tsne[k, 0],
+    #         za_tsne[k, 1],
+    #         za_moved_tsne[k, 0] - za_tsne[k, 0],
+    #         za_moved_tsne[k, 1] - za_tsne[k, 1],
+    #         length_includes_head=True,
+    #         head_width=0.5,
+    #         alpha=0.5,
+    #     )
+
+    # # Highlight the selected point i=11
+    # plt.scatter(
+    #     za_tsne[i, 0],
+    #     za_tsne[i, 1],
+    #     s=100,
+    #     marker="x",
+    #     label="chosen source point",
+    # )
+
+    # plt.scatter(
+    #     za_moved_tsne[i, 0],
+    #     za_moved_tsne[i, 1],
+    #     s=100,
+    #     marker="*",
+    #     label="transported point",
+    # )
+
+    # plt.xlabel("t-SNE dimension 1")
+    # plt.ylabel("t-SNE dimension 2")
+    # plt.legend()
+    # plt.title("t-SNE visualization of Sinkhorn transport")
+    # plt.show()
     x_old = model.decoder(z_old)
     x_halfway = model.decoder(z_halfway)
     x_new = model.decoder(z_new)
