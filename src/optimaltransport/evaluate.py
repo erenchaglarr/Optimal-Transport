@@ -8,12 +8,12 @@ import numpy as np
 from .save import load_checkpoint
 from .data import get_mnist_dataset, make_loader, get_labels
 from .lossfn import reconstruction_mse_loss, torch_batch_to_jax
+from .eval_perf import eval_perf, print_report
 
 
 @eqx.filter_jit
 def eval_step(model, x_batch):
     return reconstruction_mse_loss(model, x_batch)
-
 
 def evaluate_model(model, loader):
     losses = []
@@ -24,7 +24,6 @@ def evaluate_model(model, loader):
         losses.append(float(loss))
 
     return {"reconstruction_mse": float(np.mean(losses))}
-
 
 def evaluate_checkpoint(config, checkpoint_path=None, split="test"):
     if checkpoint_path is None:
@@ -52,7 +51,10 @@ def evaluate_checkpoint(config, checkpoint_path=None, split="test"):
     print(f"Checkpoint: {checkpoint_path}")
     print(f"Reconstruction MSE: {metrics['reconstruction_mse']:.6f}")
 
-    return {
+    perf_report = eval_perf(model, dataset, 1, 2)
+    print_report(perf_report)
+
+    return { # not used
         "checkpoint_path": str(checkpoint_path),
         "split": split,
         **metrics,

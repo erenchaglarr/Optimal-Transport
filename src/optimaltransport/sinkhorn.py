@@ -4,8 +4,6 @@ import jax
 import jax.numpy as jnp
 import equinox as eqx
 
-
-
 def sinkhorn(a, b, C, eps=0.1, min_error=0.1, max_iters=100):
     n = a.shape[0]
     m = b.shape[0]
@@ -22,8 +20,7 @@ def sinkhorn(a, b, C, eps=0.1, min_error=0.1, max_iters=100):
     (u, v) = jax.lax.fori_loop(0, max_iters, do_iteration, (u, v))
 
     P = jnp.diag(u) @ K @ jnp.diag(v)
-    return P
- 
+    return u, v, P
 
 def sinkhorn_log(a, b, C, eps=0.1, max_iters=100, tol=1e-12): 
     """ Solve entropic OT: min_P <C, P> + eps * sum(P_ij (log P_ij - 1)) s.t. P 1 = a, P^T 1 = b using log-domain Sinkhorn iterations. """ 
@@ -44,7 +41,6 @@ def sinkhorn_log(a, b, C, eps=0.1, max_iters=100, tol=1e-12):
     P = jnp.exp(logP) 
    # P /= P.sum() 
     return jnp.exp(log_u),jnp.exp(log_v), P
-
 
 ex_a = jnp.array([1, 1, 0])
 ex_b = jnp.array([0, 1, 1])
