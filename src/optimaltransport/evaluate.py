@@ -6,8 +6,9 @@ import equinox as eqx
 import numpy as np
 
 from .save import load_checkpoint
-from .data import get_mnist_dataset, make_loader, get_labels
+from .data import get_mnist_dataset, make_loader
 from .lossfn import reconstruction_mse_loss, torch_batch_to_jax
+from .KNN_classifier import evaluate_knn_on_eqx_checkpoints
 
 
 @eqx.filter_jit
@@ -29,10 +30,13 @@ def evaluate_model(model, loader):
 def evaluate_checkpoint(config, checkpoint_path=None, split="test"):
     if checkpoint_path is None:
         checkpoint_path = Path(config.paths.model_dir) / config.paths.final_model_name
+    else:
+        checkpoint_path = Path(checkpoint_path)
 
     model, _ = load_checkpoint(checkpoint_path)
 
     use_train_split = split == "train"
+
     dataset = get_mnist_dataset(
         data_root=config.data.root,
         train=use_train_split,
@@ -58,31 +62,58 @@ def evaluate_checkpoint(config, checkpoint_path=None, split="test"):
         **metrics,
     }
 
-def run_sinkhorn(config, class_a, class_b):
-    model, _ = load_checkpoint(checkpoint_path)
-    dataset = get_mnist_dataset(
-        data_root=config.data.root,
-        train=False,
-        download=bool(config.data.download),
+
+def evaluate_knn_checkpoints(
+    config,
+    checkpoint_path=None,
+    k_values=(1, 3, 5, 10, 20),
+    standardize=True,
+    export_name="knn_eqx_checkpoint_results.csv",
+):
+    if checkpoint_path is None:
+        checkpoint_paths = None
+    else:
+        checkpoint_paths = [Path(checkpoint_path)]
+
+    export_path = Path(config.paths.model_dir) / export_name
+
+    knn_table = evaluate_knn_on_eqx_checkpoints(
+        config=config,
+        checkpoint_paths=checkpoint_paths,
+        checkpoint_glob="*.eqx",
+        k_values=k_values,
+        standardize=standardize,
+        export_path=export_path,
     )
-    labels = get_labels(dataset)
-    dataset_tensor = dataset.data
-    class_a_x = dataset_tensor[labels == class_a]
-    class_b_x = dataset_tensor[labels == class_b]
-    class_a_z = jax.vmap(model.encoder)(class_a_x)
-    class_b_z = jax.vmap(model.encoder)(class_b_x)
-    a_n, b_n  = len(class_a_z), len(class_b_z)
-    a = jnp.ones(a_n)
-    b = jnp.ones(b_n) * (b_n / a_n)
 
-    def c(az, bz):
-        return sqrt(sum((azi-bzi)**2 for (azi, bzi) in zip(az, bz)))
+    return {
+        "knn_table": knn_table,
+        "knn_table_path": str(export_path),
+    }
 
-    C = jnp.asarray([[c(az[i], bz[j])
-                           for i in range(a_n)]
-                          for j in range(b_n)])
 
-    P, u, v = sinkhorn(a, b, C)
+def run_evaluation_pipeline(config):
+    """
+    Runs both reconstruction evaluation and KNN latent-space evaluation.
+    """
 
-    xhat = (dataset_tensor[0])
+    checkpoint_path = Path(config.paths.model_dir) / config.paths.final_model_name
 
+    reconstruction_results = evaluate_checkpoint(
+        config=config,
+        checkpoint_path=checkpoint_path,
+        split="test",
+    )
+
+    knn_results = evaluate_knn_on_eqx_checkpoints(
+        config=config,
+        checkpoint_path=checkpoint_path,
+        k_values=(1, 3, 5, 10, 20),
+        standardize=True,
+        export_name="knn_latent_results.csv",
+    )
+
+    return {
+        "reconstruction_results": reconstruction_results,
+        "knn_results": knn_results,
+    }

@@ -3,8 +3,8 @@ from __future__ import annotations
 import argparse
 
 from omegaconf import OmegaConf
-
-from .evaluate import evaluate_checkpoint
+from pathlib import Path
+from .evaluate import evaluate_checkpoint, evaluate_knn_on_eqx_checkpoints
 from .visualize import visualize_checkpoint
 from .train import run_training_pipeline
 from .sinkhorn2_eletric_bugaloo import cost_matrix
@@ -13,11 +13,12 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, default="config.yaml")
     parser.add_argument(
-        "--mode",
-        type=str,
-        choices=["train", "evaluate", "visualize", "all" , "hehe"],
-        default="all",
-    )
+    "--mode",
+    type=str,
+    choices=["train", "evaluate", "knn", "visualize", "all", "hehe"],
+    default="all",
+    ),
+    
     parser.add_argument("--checkpoint", type=str, default=None)
     parser.add_argument(
         "--split",
@@ -58,6 +59,19 @@ def main():
             checkpoint_path=checkpoint_path,
             split= "train",
         )
+    if args.mode in {"knn"}:
+        if checkpoint_path is None:
+            checkpoint_paths = [
+            Path(config.paths.model_dir) / config.paths.final_model_name
+        ]
+    else:
+        checkpoint_paths = [Path(checkpoint_path)]
+
+    evaluate_knn_on_eqx_checkpoints(
+        config=config,
+        checkpoint_paths=checkpoint_paths,
+        export_path=Path(config.paths.model_dir) / "knn_eqx_checkpoint_results.csv",
+    )
 
 
 
