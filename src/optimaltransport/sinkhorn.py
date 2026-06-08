@@ -15,8 +15,6 @@ def sinkhorn(a, b, C, eps=0.1, min_error=0.1, max_iters=100):
     iters = 0
     def do_iteration(i, uv):
         (u, v) = uv
-        row_mass = jnp.sum(jnp.diag(u) @ K @ jnp.diag(v), axis=1, keepdims=True)
-        col_mass = jnp.sum(jnp.diag(u) @ K @ jnp.diag(v), axis=0, keepdims=True)
         u = a/((K @ v)+1e-6)
         v = b/((K.T @ u)+1e-6)
         return (u, v)
@@ -47,3 +45,22 @@ def sinkhorn_log(a, b, C, eps=0.1, max_iters=100, tol=1e-12):
    # P /= P.sum() 
     return jnp.exp(log_u),jnp.exp(log_v), P
 
+
+ex_a = jnp.array([1, 1, 0])
+ex_b = jnp.array([0, 1, 1])
+ex_C = jnp.array([[0, 1, 1],
+                  [1, 0, 1],
+                  [1, 1, 0]])
+
+#print(jax.jit(sinkhorn)(ex_a, ex_b, ex_C))
+#print(jax.jit(sinkhorn)(ex_a, ex_b, ex_C))
+
+# c = jax.jit(sinkhorn).lower(ex_a, ex_b, ex_C).compile()
+# print(c.as_text())
+# print(dir(c.runtime_executable()))
+       # .execute(ex_a, ex_b, ex_C)))
+
+# c = jax.jit(sinkhorn).lower(ex_a, ex_b, ex_C).compile()
+# print(c.as_text())
+# print(dir(c.runtime_executable()))
+       # .execute(ex_a, ex_b, ex_C)))
