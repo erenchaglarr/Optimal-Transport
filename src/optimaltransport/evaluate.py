@@ -28,7 +28,7 @@ def evaluate_model(model, loader):
 
 def evaluate_checkpoint(config, checkpoint_path=None, split="test"):
     if checkpoint_path is None:
-        checkpoint_path = Path(config.paths.checkpoint_dir) / config.paths.best_checkpoint_name
+        checkpoint_path = Path(config.paths.model_dir) / config.paths.final_model_name
 
     model, _ = load_checkpoint(checkpoint_path)
 
