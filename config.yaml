@@ -18,7 +18,7 @@ training:
 
 paths:
   model_dir: "./models"
-  final_model_name: "latent2.eqx"
+  final_model_name: "best_autoencoder2.eqx"
 
 visualization:
   num_examples: 5 
