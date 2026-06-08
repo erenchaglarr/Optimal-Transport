@@ -1,114 +1,22 @@
-1
-========== Cross-validation summary ==========
-Fold 01: final train = 0.041567, final val = 0.042271, best val = 0.042271, gap = 0.000704, rel_gap = 1.69%
-Fold 02: final train = 0.041326, final val = 0.042241, best val = 0.042213, gap = 0.000915, rel_gap = 2.21%
-Fold 03: final train = 0.041436, final val = 0.042368, best val = 0.042328, gap = 0.000933, rel_gap = 2.25%
-Fold 04: final train = 0.042442, final val = 0.042985, best val = 0.042209, gap = 0.000542, rel_gap = 1.28%
-Fold 05: final train = 0.041240, final val = 0.041876, best val = 0.041779, gap = 0.000636, rel_gap = 1.54%
-Fold 06: final train = 0.041463, final val = 0.042026, best val = 0.042026, gap = 0.000563, rel_gap = 1.36%
-Fold 07: final train = 0.041576, final val = 0.041914, best val = 0.041914, gap = 0.000338, rel_gap = 0.81%
-Fold 08: final train = 0.041770, final val = 0.042912, best val = 0.042801, gap = 0.001142, rel_gap = 2.73%
-Fold 09: final train = 0.041975, final val = 0.042483, best val = 0.042292, gap = 0.000508, rel_gap = 1.21%
-Fold 10: final train = 0.041672, final val = 0.041827, best val = 0.041827, gap = 0.000155, rel_gap = 0.37%
-
-Mean final train loss over 10 folds: 0.041647
-Mean final val loss over 10 folds: 0.042290
-Std final val loss over 10 folds: 0.000410
-Mean best val loss over 10 folds: 0.042166
-
-Mean generalization gap: 0.000644
-Std generalization gap: 0.000294
-Mean relative generalization gap: 1.55%
-95% CI for generalization gap: [0.000433, 0.000854]
-
-2
-========== Cross-validation summary ==========
-Fold 01: final train = 0.031990, final val = 0.034472, best val = 0.034336, gap = 0.002481, rel_gap = 7.76%
-Fold 02: final train = 0.031767, final val = 0.034402, best val = 0.034402, gap = 0.002635, rel_gap = 8.29%
-Fold 03: final train = 0.031940, final val = 0.034437, best val = 0.034437, gap = 0.002497, rel_gap = 7.82%
-Fold 04: final train = 0.031899, final val = 0.034543, best val = 0.034517, gap = 0.002644, rel_gap = 8.29%
-Fold 05: final train = 0.031894, final val = 0.034522, best val = 0.034391, gap = 0.002627, rel_gap = 8.24%
-Fold 06: final train = 0.032022, final val = 0.034310, best val = 0.034287, gap = 0.002288, rel_gap = 7.14%
-Fold 07: final train = 0.031827, final val = 0.034631, best val = 0.034511, gap = 0.002804, rel_gap = 8.81%
-Fold 08: final train = 0.031922, final val = 0.034874, best val = 0.034829, gap = 0.002952, rel_gap = 9.25%
-Fold 09: final train = 0.032031, final val = 0.034437, best val = 0.034437, gap = 0.002406, rel_gap = 7.51%
-Fold 10: final train = 0.032167, final val = 0.034130, best val = 0.034130, gap = 0.001963, rel_gap = 6.10%
-
-Mean final train loss over 10 folds: 0.031946
-Mean final val loss over 10 folds: 0.034476
-Std final val loss over 10 folds: 0.000196
-Mean best val loss over 10 folds: 0.034428
-
-Mean generalization gap: 0.002530
-Std generalization gap: 0.000276
-Mean relative generalization gap: 7.92%
-95% CI for generalization gap: [0.002332, 0.002727]
-
-3
-========== Cross-validation summary ==========
-Fold 01: final train = 0.027001, final val = 0.029326, best val = 0.029174, gap = 0.002325, rel_gap = 8.61%
-Fold 02: final train = 0.026647, final val = 0.029016, best val = 0.028990, gap = 0.002369, rel_gap = 8.89%
-Fold 03: final train = 0.026659, final val = 0.029474, best val = 0.029459, gap = 0.002814, rel_gap = 10.56%
-Fold 04: final train = 0.026638, final val = 0.029056, best val = 0.028908, gap = 0.002418, rel_gap = 9.08%
-Fold 05: final train = 0.026769, final val = 0.029384, best val = 0.029359, gap = 0.002615, rel_gap = 9.77%
-Fold 06: final train = 0.026663, final val = 0.029230, best val = 0.029042, gap = 0.002567, rel_gap = 9.63%
-Fold 07: final train = 0.026663, final val = 0.029100, best val = 0.029100, gap = 0.002436, rel_gap = 9.14%
-Fold 08: final train = 0.026562, final val = 0.029373, best val = 0.029373, gap = 0.002812, rel_gap = 10.59%
-Fold 09: final train = 0.026708, final val = 0.029183, best val = 0.029183, gap = 0.002475, rel_gap = 9.27%
-Fold 10: final train = 0.026788, final val = 0.029258, best val = 0.029154, gap = 0.002469, rel_gap = 9.22%
-
-Mean final train loss over 10 folds: 0.026710
-Mean final val loss over 10 folds: 0.029240
-Std final val loss over 10 folds: 0.000152
-Mean best val loss over 10 folds: 0.029174
-
-Mean generalization gap: 0.002530
-Std generalization gap: 0.000172
-Mean relative generalization gap: 9.47%
-95% CI for generalization gap: [0.002407, 0.002653]
-
-5
-========== Cross-validation summary ==========
-Fold 01: final train = 0.018934, final val = 0.021073, best val = 0.020983, gap = 0.002138, rel_gap = 11.29%
-Fold 02: final train = 0.019012, final val = 0.021280, best val = 0.021280, gap = 0.002267, rel_gap = 11.92%
-Fold 03: final train = 0.019182, final val = 0.021363, best val = 0.021363, gap = 0.002181, rel_gap = 11.37%
-Fold 04: final train = 0.018876, final val = 0.020965, best val = 0.020912, gap = 0.002089, rel_gap = 11.07%
-Fold 05: final train = 0.018964, final val = 0.021006, best val = 0.020997, gap = 0.002041, rel_gap = 10.76%
-Fold 06: final train = 0.019214, final val = 0.021332, best val = 0.021332, gap = 0.002118, rel_gap = 11.03%
-Fold 07: final train = 0.018968, final val = 0.021144, best val = 0.021141, gap = 0.002176, rel_gap = 11.47%
-Fold 08: final train = 0.018984, final val = 0.021419, best val = 0.021400, gap = 0.002435, rel_gap = 12.83%
-Fold 09: final train = 0.019353, final val = 0.021549, best val = 0.021523, gap = 0.002196, rel_gap = 11.34%
-Fold 10: final train = 0.019168, final val = 0.020989, best val = 0.020989, gap = 0.001821, rel_gap = 9.50%
-
-Mean final train loss over 10 folds: 0.019066
-Mean final val loss over 10 folds: 0.021212
-Std final val loss over 10 folds: 0.000204
-Mean best val loss over 10 folds: 0.021192
-
-Mean generalization gap: 0.002146
-Std generalization gap: 0.000158
-Mean relative generalization gap: 11.26%
-95% CI for generalization gap: [0.002034, 0.002259]
-
 10
 ========== Cross-validation summary ==========
-Fold 01: final train = 0.010766, final val = 0.012119, best val = 0.012062, gap = 0.001353, rel_gap = 12.56%
-Fold 02: final train = 0.010592, final val = 0.012078, best val = 0.011989, gap = 0.001486, rel_gap = 14.03%
-Fold 03: final train = 0.010735, final val = 0.012166, best val = 0.012166, gap = 0.001431, rel_gap = 13.33%
-Fold 04: final train = 0.010937, final val = 0.012164, best val = 0.012164, gap = 0.001227, rel_gap = 11.22%
-Fold 05: final train = 0.010551, final val = 0.012046, best val = 0.011838, gap = 0.001495, rel_gap = 14.17%
-Fold 06: final train = 0.010423, final val = 0.011637, best val = 0.011637, gap = 0.001214, rel_gap = 11.65%
-Fold 07: final train = 0.010461, final val = 0.011699, best val = 0.011699, gap = 0.001238, rel_gap = 11.84%
-Fold 08: final train = 0.010486, final val = 0.011983, best val = 0.011983, gap = 0.001498, rel_gap = 14.28%
-Fold 09: final train = 0.010567, final val = 0.011925, best val = 0.011925, gap = 0.001358, rel_gap = 12.85%
-Fold 10: final train = 0.010485, final val = 0.011666, best val = 0.011609, gap = 0.001182, rel_gap = 11.27%
+Fold 01: final train = 0.012049, final val = 0.013211, best val = 0.013211, gap = 0.001161, rel_gap = 9.64%
+Fold 02: final train = 0.012710, final val = 0.013856, best val = 0.013856, gap = 0.001145, rel_gap = 9.01%
+Fold 03: final train = 0.012400, final val = 0.013573, best val = 0.013573, gap = 0.001173, rel_gap = 9.46%
+Fold 04: final train = 0.012402, final val = 0.013507, best val = 0.013436, gap = 0.001104, rel_gap = 8.90%
+Fold 05: final train = 0.012105, final val = 0.013340, best val = 0.013203, gap = 0.001235, rel_gap = 10.20%
+Fold 06: final train = 0.012406, final val = 0.013441, best val = 0.013441, gap = 0.001035, rel_gap = 8.34%
+Fold 07: final train = 0.012585, final val = 0.013752, best val = 0.013752, gap = 0.001167, rel_gap = 9.28%
+Fold 08: final train = 0.012351, final val = 0.013721, best val = 0.013721, gap = 0.001370, rel_gap = 11.09%
+Fold 09: final train = 0.011920, final val = 0.012946, best val = 0.012946, gap = 0.001026, rel_gap = 8.61%
+Fold 10: final train = 0.013228, final val = 0.014299, best val = 0.014299, gap = 0.001071, rel_gap = 8.10%
 
-Mean final train loss over 10 folds: 0.010600
-Mean final val loss over 10 folds: 0.011949
-Std final val loss over 10 folds: 0.000208
-Mean best val loss over 10 folds: 0.011907
+Mean final train loss over 10 folds: 0.012416
+Mean final val loss over 10 folds: 0.013565
+Std final val loss over 10 folds: 0.000374
+Mean best val loss over 10 folds: 0.013544
 
-Mean generalization gap: 0.001348
-Std generalization gap: 0.000126
-Mean relative generalization gap: 12.72%
-95% CI for generalization gap: [0.001258, 0.001438]
+Mean generalization gap: 0.001149
+Std generalization gap: 0.000102
+Mean relative generalization gap: 9.26%
+95% CI for generalization gap: [0.001076, 0.001222]
