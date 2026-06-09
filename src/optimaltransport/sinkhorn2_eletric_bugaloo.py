@@ -14,31 +14,51 @@ from .save import load_checkpoint
 from .lossfn import torch_batch_to_jax
 from .sinkhorn import sinkhorn
 
-def gaussian_kernel(sigma, x, y):
-    """This function computes the gaussian kernel for points x and y
+@jax.jit
+def pairwise_sq_dists(x, y):
+    x_norm = jnp.sum(x ** 2, axis=1, keepdims=True)
+    y_norm = jnp.sum(y ** 2, axis=1, keepdims=True).T
 
-    Args:
-        x (vector)
-        y (vector)
-        sigma (int)
+    d2 = x_norm + y_norm - 2.0 * (x @ y.T)
+    return jnp.maximum(d2, 0.0)
 
-    Returns:
-        Matrix
-    """
-    d2 = np.linalg.norm(x,y)
-    return jax.numpy.exp(-d2/2.0*sigma**2)
+@jax.jit
+def gaussian_kernel_matrix(x, y, sigma):
+    d2 = pairwise_sq_dists(x, y)
+    return jnp.exp(-d2 / (2.0 * sigma ** 2))
 
-def mmd(X, Y, kernel):
+@jax.jit
+def mmd2_rbf(x, y, sigma):
+    Kxx = gaussian_kernel_matrix(x, x, sigma)
+    Kyy = gaussian_kernel_matrix(y, y, sigma)
+    Kxy = gaussian_kernel_matrix(x, y, sigma)
+
+    return jnp.mean(Kxx) + jnp.mean(Kyy) - 2.0 * jnp.mean(Kxy)
+
+
+def median_heuristic(x, y, eps=1e-8):
+    z = jnp.concatenate([x, y], axis=0)
+    d2 = pairwise_sq_dists(z, z)
+
+    d2_np = np.array(d2)
+    d2_nonzero = d2_np[d2_np > eps]
+
+    sigma = np.sqrt(0.5 * np.median(d2_nonzero) + eps)
+
+    return jnp.array(sigma)
+
+
+def evaluate_transport_mmd(zb, za_moved):
     """
-    This function computes Maximum Mean Discrepancy 
-    for given probability distributions X and Y a kernel and sigma
+    Compares source-target MMD before and after transport.
     """
-    
-    Kxx = kernel(X,X)
-    Kyy = kernel(Y,Y)
-    Kxy = kernel(X,Y)
-    
-    return jnp.mean(Kxx) + jnp.mean(Kyy) - 2.0*jnp.mean(Kxy)
+    sigma = median_heuristic(za_moved, zb)
+    mmd = mmd2_rbf(za_moved, zb, sigma)
+
+    return {
+        "sigma": sigma,
+        "mmd": mmd,
+    }
 
 def gen_cost_matrix(za, zb):
     diff = za[:, None, :] - zb[None, :, :]
@@ -121,7 +141,6 @@ def embed_and_run_sinkhorn(config,  checkpoint_path=None, split="train"):
 
     viz_interp(model, 3, za, za_moved)
     
-    mmd(za_moved, zb, partial(gaussian_kernel, 1))
+    print(evaluate_transport_mmd(zb, za_moved))
         
     return P, za, zb, za_moved,
-
