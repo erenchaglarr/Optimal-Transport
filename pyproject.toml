@@ -32,6 +32,7 @@ dependencies = [
     "typer==0.15.1",
     "umap-learn>=0.5.12",
     "uvicorn==0.34.0",
+    "xprof>=2.22.3",
 ]
 [project.optional-dependencies]
 

@@ -9,7 +9,7 @@ from .save import load_checkpoint
 from .data import get_mnist_dataset, make_loader
 from .lossfn import reconstruction_mse_loss, torch_batch_to_jax
 from .KNN_classifier import evaluate_knn_on_eqx_checkpoints
-
+from .eval_perf import eval_perf, print_report
 
 @eqx.filter_jit
 def eval_step(model, x_batch):

@@ -50,7 +50,7 @@ def gen_cost_matrix(model, dataset, class_a, class_b, n=None, m=None):
 
     return a, b, C
 
-def time_sinkhorn_func(comp_n, f_n, device_n, a, b, C):
+def eval_sinkhorn_func(comp_n, f_n, device_n, a, b, C):
     f_name, f = f_n
     comp_name, comp_f, run_f = comp_n
     device_name, device = device_n
@@ -58,9 +58,11 @@ def time_sinkhorn_func(comp_n, f_n, device_n, a, b, C):
     start = perf_counter_ns()
     compiled_f = comp_f(f, a, b, C)
     comptime_end = perf_counter_ns()
-    P, u, v = [pt.block_until_ready() for pt in run_f(compiled_f, a, b, C)] # necessary to avoid lazy evaluation in jax
+    trace_filename = f"/tmp/jax-trace-{f_name}-{comp_name}-{device_name}"
+    with jax.profiler.trace(trace_filename):
+        P, u, v = [pt.block_until_ready() for pt in run_f(compiled_f, a, b, C)] # necessary to avoid lazy evaluation in jax and fully materialize P, u and v
     end = perf_counter_ns()
-    return (comptime_end - start), (end - comptime_end)
+    return (comptime_end - start), (end - comptime_end), trace_filename
 
 def eval_perf(model, dataset, class_a, class_b):
     a, b, C = gen_cost_matrix(model, dataset, class_a, class_b, 100, 100)
@@ -68,13 +70,13 @@ def eval_perf(model, dataset, class_a, class_b):
                              ("aot", lambda f, *args: jax_aot(f, *args), lambda f, *args: f(*args)))
     devices = jax_devices() 
     sinkhorn_functions = (("linear", sinkhorn), ("log", sinkhorn_log))
-    report =  [(comp_f[0], sinkhorn_f[0], device[0], time_sinkhorn_func(comp_f, sinkhorn_f, device, a, b, C))
+    report =  [(comp_f[0], sinkhorn_f[0], device[0], eval_sinkhorn_func(comp_f, sinkhorn_f, device, a, b, C))
             for (comp_f, sinkhorn_f, device)
             in product(compilation_functions, sinkhorn_functions, devices)]
     return report 
 
 def print_report(report):
-    print(f"|{'compilation':20}|{'impl':20}|{'device':20}|{'comptime(ns)':20}|{'runtime(ns)':20}|{'total(ns)':20}")
-    print(("+" + ("-" * 20)) * 6)
+    print(f"|{'compilation':20}|{'impl':20}|{'device':20}|{'comptime(ns)':20}|{'runtime(ns)':20}|{'total(ns)':20}|{'xprof file':20}")
+    print(("+" + ("-" * 20)) * 7)
     for compilation, impl, device, perf in report:
-        print(f"|{compilation:20}|{impl:20}|{device:20}|{perf[0]:20}|{perf[1]:20}|{perf[1] + perf[0]:20}")
+        print(f"|{compilation:20}|{impl:20}|{device:20}|{perf[0]:20}|{perf[1]:20}|{perf[1] + perf[0]:20}|{perf[2]:20}")
