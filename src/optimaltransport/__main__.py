@@ -7,7 +7,7 @@ from pathlib import Path
 from .evaluate import evaluate_checkpoint, evaluate_knn_on_eqx_checkpoints
 from .visualize import visualize_checkpoint
 from .train import run_training_pipeline
-from .sinkhorn2_eletric_bugaloo import cost_matrix
+from .sinkhorn2_eletric_bugaloo import embed_and_run_sinkhorn
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -53,8 +53,8 @@ def main():
             checkpoint_path=checkpoint_path,
             split=vis_split,
         )
-    if args.mode in {"hehe"}:
-        cost_matrix(
+    if args.mode in {"sinkhorn"}:
+        embed_and_run_sinkhorn(
             config=config,
             checkpoint_path=checkpoint_path,
             split= "train",
