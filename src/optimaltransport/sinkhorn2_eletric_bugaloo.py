@@ -13,8 +13,35 @@ from .save import load_checkpoint
 from .lossfn import torch_batch_to_jax
 from .sinkhorn import sinkhorn
 
+
+def GaussianKernel(x, y, sigma):
+    """This function computes the gaussian kernel for points x and y
+
+    Args:
+        x (vector)
+        y (vector)
+        sigma (int)
+
+    Returns:
+        Matrix
+    """
+    d2 = np.linalg.norm(x,y)
+    return jax.numpy.exp(-d2/2.0*sigma**2)
+
+def MMD(X, Y, kernel,sigma):
+    """
+    This function computes Maximum Mean Discrepancy 
+    for given probability distributions X and Y a kernel and sigma
+    """
+    
+    Kxx = kernel(X,X, sigma)
+    Kyy = kernel(Y,Y, sigma)
+    Kxy = kernel(X,Y, sigma)
+    
+    return jnp.mean(Kxx) + jnp.mean(Kyy) - 2.0*jnp.mean(Kxy)
+
 def cost_matrix(config,  checkpoint_path=None, split="train"):
-    dataset = get_mnist_dataset(
+    dataset = get_mnist_dataset(    
         data_root=config.data.root,
         train=(split == "train"),
         download=bool(config.data.download),
@@ -110,8 +137,10 @@ def cost_matrix(config,  checkpoint_path=None, split="train"):
 
     for ax in axes:
         ax.axis("off")
-
-    plt.tight_layout()
-    plt.show()
-    return P, za, zb, za_moved
+    
+    MMD(za_moved, zb, GaussianKernel(za_moved, zb, 1), 1)
+        
+    # plt.tight_layout()
+    # plt.show()
+    return P, za, zb, za_moved,
 
