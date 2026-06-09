@@ -15,7 +15,6 @@ from .KNN_classifier import evaluate_knn_on_eqx_checkpoints
 def eval_step(model, x_batch):
     return reconstruction_mse_loss(model, x_batch)
 
-
 def evaluate_model(model, loader):
     losses = []
 
@@ -25,7 +24,6 @@ def evaluate_model(model, loader):
         losses.append(float(loss))
 
     return {"reconstruction_mse": float(np.mean(losses))}
-
 
 def evaluate_checkpoint(config, checkpoint_path=None, split="test"):
     if checkpoint_path is None:
@@ -56,7 +54,10 @@ def evaluate_checkpoint(config, checkpoint_path=None, split="test"):
     print(f"Checkpoint: {checkpoint_path}")
     print(f"Reconstruction MSE: {metrics['reconstruction_mse']:.6f}")
 
-    return {
+    perf_report = eval_perf(model, dataset, 1, 2)
+    print_report(perf_report)
+
+    return { # not used
         "checkpoint_path": str(checkpoint_path),
         "split": split,
         **metrics,
