@@ -13,6 +13,7 @@ from .save import load_checkpoint
 from .lossfn import torch_batch_to_jax
 from .sinkhorn import sinkhorn
 
+<<<<<<< HEAD
 
 def GaussianKernel(x, y, sigma):
     """This function computes the gaussian kernel for points x and y
@@ -42,6 +43,10 @@ def MMD(X, Y, kernel,sigma):
 
 def cost_matrix(config,  checkpoint_path=None, split="train"):
     dataset = get_mnist_dataset(    
+=======
+def embed_and_run_sinkhorn(config,  checkpoint_path=None, split="train"):
+    dataset = get_mnist_dataset(
+>>>>>>> b80f3cb1b5306ef43e4751b48acdef7dc9ba4efb
         data_root=config.data.root,
         train=(split == "train"),
         download=bool(config.data.download),
