@@ -57,11 +57,11 @@ def evaluate_transport_mmd(zb, za_moved):
     Compares source-target MMD before and after transport.
     """
     sigma = median_heuristic(za_moved, zb)
-    mmd_after = mmd2_rbf(za_moved, zb, sigma)
+    mmd = mmd2_rbf(za_moved, zb, sigma)
 
     return {
         "sigma": sigma,
-        "mmd_after": mmd_after,
+        "mmd": mmd,
     }
 
 def embed_and_run_sinkhorn(config,  checkpoint_path=None, split="train"):
