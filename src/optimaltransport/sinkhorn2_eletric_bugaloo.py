@@ -13,40 +13,59 @@ from .save import load_checkpoint
 from .lossfn import torch_batch_to_jax
 from .sinkhorn import sinkhorn
 
-<<<<<<< HEAD
+@jax.jit
+def pairwise_sq_dists(x, y):
+    x_norm = jnp.sum(x ** 2, axis=1, keepdims=True)
+    y_norm = jnp.sum(y ** 2, axis=1, keepdims=True).T
 
-def GaussianKernel(x, y, sigma):
-    """This function computes the gaussian kernel for points x and y
+    d2 = x_norm + y_norm - 2.0 * (x @ y.T)
 
-    Args:
-        x (vector)
-        y (vector)
-        sigma (int)
+    return jnp.maximum(d2, 0.0)
 
-    Returns:
-        Matrix
+
+@jax.jit
+def gaussian_kernel_matrix(x, y, sigma):
+    d2 = pairwise_sq_dists(x, y)
+    return jnp.exp(-d2 / (2.0 * sigma ** 2))
+
+@jax.jit
+def mmd2_rbf(x, y, sigma):
+    Kxx = gaussian_kernel_matrix(x, x, sigma)
+    Kyy = gaussian_kernel_matrix(y, y, sigma)
+    Kxy = gaussian_kernel_matrix(x, y, sigma)
+
+    return jnp.mean(Kxx) + jnp.mean(Kyy) - 2.0 * jnp.mean(Kxy)
+
+
+def median_heuristic(x, y, eps=1e-8):
     """
-    d2 = np.linalg.norm(x,y)
-    return jax.numpy.exp(-d2/2.0*sigma**2)
-
-def MMD(X, Y, kernel,sigma):
+    Simple RBF bandwidth choice.
     """
-    This function computes Maximum Mean Discrepancy 
-    for given probability distributions X and Y a kernel and sigma
-    """
-    
-    Kxx = kernel(X,X, sigma)
-    Kyy = kernel(Y,Y, sigma)
-    Kxy = kernel(X,Y, sigma)
-    
-    return jnp.mean(Kxx) + jnp.mean(Kyy) - 2.0*jnp.mean(Kxy)
+    z = jnp.concatenate([x, y], axis=0)
+    d2 = pairwise_sq_dists(z, z)
 
-def cost_matrix(config,  checkpoint_path=None, split="train"):
-    dataset = get_mnist_dataset(    
-=======
+    d2_np = np.array(d2)
+    d2_nonzero = d2_np[d2_np > eps]
+
+    sigma = np.sqrt(0.5 * np.median(d2_nonzero) + eps)
+
+    return jnp.array(sigma)
+
+
+def evaluate_transport_mmd(zb, za_moved):
+    """
+    Compares source-target MMD before and after transport.
+    """
+    sigma = median_heuristic(za_moved, zb)
+    mmd_after = mmd2_rbf(za_moved, zb, sigma)
+
+    return {
+        "sigma": sigma,
+        "mmd_after": mmd_after,
+    }
+
 def embed_and_run_sinkhorn(config,  checkpoint_path=None, split="train"):
-    dataset = get_mnist_dataset(
->>>>>>> b80f3cb1b5306ef43e4751b48acdef7dc9ba4efb
+    dataset = get_mnist_dataset(    
         data_root=config.data.root,
         train=(split == "train"),
         download=bool(config.data.download),
@@ -142,10 +161,16 @@ def embed_and_run_sinkhorn(config,  checkpoint_path=None, split="train"):
 
     for ax in axes:
         ax.axis("off")
-    
-    MMD(za_moved, zb, GaussianKernel(za_moved, zb, 1), 1)
-        
-    # plt.tight_layout()
-    # plt.show()
-    return P, za, zb, za_moved,
 
+        
+    plt.tight_layout()
+    plt.show()
+    
+    
+    mmd_results = evaluate_transport_mmd(
+        zb=zb,
+        za_moved=za_moved,
+    )
+    print(mmd_results)
+    
+    return P, za, zb, za_moved

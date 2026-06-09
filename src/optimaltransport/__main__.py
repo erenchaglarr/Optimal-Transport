@@ -15,7 +15,7 @@ def parse_args():
     parser.add_argument(
     "--mode",
     type=str,
-    choices=["train", "evaluate", "knn", "visualize", "all", "hehe"],
+    choices=["train", "evaluate", "knn", "visualize", "all", "sinkhorn"],
     default="all",
     ),
     
@@ -32,8 +32,15 @@ def parse_args():
 def main():
     args = parse_args()
     config = OmegaConf.load(args.config)
-
     checkpoint_path = args.checkpoint
+
+    if checkpoint_path is None:
+        checkpoint_paths = [
+            Path(config.paths.model_dir) / config.paths.final_model_name
+        ]
+    else:
+        checkpoint_paths = [Path(checkpoint_path)]
+    
 
     if args.mode in {"train", "all"}:
         results = run_training_pipeline(config)
@@ -60,14 +67,7 @@ def main():
             split= "train",
         )
     if args.mode in {"knn"}:
-        if checkpoint_path is None:
-            checkpoint_paths = [
-            Path(config.paths.model_dir) / config.paths.final_model_name
-        ]
-    else:
-        checkpoint_paths = [Path(checkpoint_path)]
-
-    evaluate_knn_on_eqx_checkpoints(
+        evaluate_knn_on_eqx_checkpoints(
         config=config,
         checkpoint_paths=checkpoint_paths,
         export_path=Path(config.paths.model_dir) / "knn_eqx_checkpoint_results.csv",
