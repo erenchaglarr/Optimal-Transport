@@ -15,7 +15,7 @@ def parse_args():
     parser.add_argument(
     "--mode",
     type=str,
-    choices=["train", "evaluate", "knn", "visualize", "all", "hehe"],
+    choices=["train", "evaluate", "knn", "visualize", "all", "sinkhorn"],
     default="all",
     ),
     
@@ -61,11 +61,9 @@ def main():
         )
     if args.mode in {"knn"}:
         if checkpoint_path is None:
-            checkpoint_paths = [
-            Path(config.paths.model_dir) / config.paths.final_model_name
-        ]
-    else:
-        checkpoint_paths = [Path(checkpoint_path)]
+            checkpoint_paths = [Path(config.paths.model_dir) / config.paths.final_model_name]
+        else:
+            checkpoint_paths = [Path(checkpoint_path)]
 
     evaluate_knn_on_eqx_checkpoints(
         config=config,
