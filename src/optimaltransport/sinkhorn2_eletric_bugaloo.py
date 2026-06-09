@@ -35,7 +35,6 @@ def mmd2_rbf(x, y, sigma):
 
     return jnp.mean(Kxx) + jnp.mean(Kyy) - 2.0 * jnp.mean(Kxy)
 
-
 def median_heuristic(x, y, eps=1e-8):
     z = jnp.concatenate([x, y], axis=0)
     d2 = pairwise_sq_dists(z, z)
@@ -48,11 +47,12 @@ def median_heuristic(x, y, eps=1e-8):
     return jnp.array(sigma)
 
 
-def evaluate_transport_mmd(zb, za_moved):
+def evaluate_transport_mmd(zb, za_moved, sigma=None):
     """
     Compares source-target MMD before and after transport.
     """
-    sigma = median_heuristic(za_moved, zb)
+    if sigma is None:
+        sigma = median_heuristic(za_moved, zb)
     mmd = mmd2_rbf(za_moved, zb, sigma)
 
     return {
@@ -118,6 +118,22 @@ def project_barycentric(z, P):
     z_moved = (P @ z) / row_mass
     return z_moved
 
+def gen_bad_plan(za, zb):
+    n_a = len(za)
+    n_b = len(zb)
+    entry = n_b / n_a
+    return jnp.ones((n_a, n_b)) * entry
+
+def mmd_for_classes(z, y, class_a, class_b):
+    filter_a = y == class_a
+    filter_b = y == class_b
+    za = z[filter_a]
+    zb = z[filter_b]
+    a, b, C = gen_cost_matrix(za, zb)
+    _,_, P = jax.jit(sinkhorn)(a,b,C)
+    za_moved = project_barycentric(zb, P)
+    return evaluate_transport_mmd(zb, za_moved, sigma=0.28)["mmd"] # needs constant sigma to make mmds comparable
+
 def embed_and_run_sinkhorn(config,  checkpoint_path=None, split="train"):
     dataset = get_mnist_dataset(
         data_root=config.data.root,
@@ -140,7 +156,9 @@ def embed_and_run_sinkhorn(config,  checkpoint_path=None, split="train"):
     za_moved = project_barycentric(zb, P)
 
     viz_interp(model, 3, za, za_moved)
+
+    print(mmd_for_classes(z, y, 1, 2))
     
-    print(evaluate_transport_mmd(zb, za_moved))
-        
+    # print(evaluate_transport_mmd(zb, za_moved))
+    # print(evaluate_transport_mmd(zb, project_barycentric(zb, gen_bad_plan(za, zb))))
     return P, za, zb, za_moved,
