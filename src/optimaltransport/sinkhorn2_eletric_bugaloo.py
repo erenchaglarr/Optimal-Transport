@@ -91,16 +91,16 @@ def arrow_plot(n_arrows, za, za_moved, zb):
         )
     plt.figure(figsize=(7, 7))
     # Highlight one example point and its transported version
-    plt.scatter(za[:, 0], za[:, 1], s=80, label="source distribution")
-    plt.scatter(za_moved[:, 0], za_moved[:, 1], s=80, label="projected source distribution")
-    plt.scatter(zb[:, 0], zb[:, 1], s=80, label="target distribution")
+    plt.scatter(za[:, 0], za[:, 1], s=2, label="source distribution")
+    plt.scatter(zb[:, 0], zb[:, 1], s=2, label="target distribution")
+    plt.scatter(za_moved[:, 0], za_moved[:, 1], s=2, label="projected source distribution")
     # print(zb.shape)
     plt.xlabel("latent dimension 1")
     plt.ylabel("latent dimension 2")
     plt.legend()
-    plt.title("Sinkhorn transport: digit 1 moved toward digit 2")
+    plt.title("Sinkhorn transport: digit 4 moved toward digit 7")
     plt.axis("equal")
-    plt.show()
+    plt.savefig("4to7.png")
     
 def project_barycentric(z, P):
     row_mass = jnp.sum(P, axis=1, keepdims=True)
