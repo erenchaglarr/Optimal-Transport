@@ -91,10 +91,10 @@ def arrow_plot(n_arrows, za, za_moved, zb):
         )
     plt.figure(figsize=(7, 7))
     # Highlight one example point and its transported version
-    plt.scatter(z_old[0], z_old[1], s=80, marker="x", label="chosen source point")
-    plt.scatter(z_new[0], z_new[1], s=80, marker="*", label="transported point")
-    plt.scatter(z_halfway[0], z_halfway[1], s=80, marker="o", label="halfway point")
-
+    plt.scatter(za[:, 0], za[:, 1], s=80, label="source distribution")
+    plt.scatter(za_moved[:, 0], za_moved[:, 1], s=80, label="projected source distribution")
+    plt.scatter(zb[:, 0], zb[:, 1], s=80, label="target distribution")
+    print(zb.shape)
     plt.xlabel("latent dimension 1")
     plt.ylabel("latent dimension 2")
     plt.legend()
@@ -153,6 +153,8 @@ def embed_and_run_sinkhorn(config,  checkpoint_path=None, split="train"):
     _,_, P = jax.jit(sinkhorn)(a,b,C)
     za_moved = project_barycentric(zb, P)
     viz_interp(model, 3, za, za_moved)
+    arrow_plot(0, za, za_moved, zb)
+
     # print("wasserstein distances:")
     # print(wasserstein_heatmap)
     # mmd_heatmap = heatmap_distance(z, y, (lambda zb, za_moved: evaluate_transport_mmd(zb, za_moved, sigma=0.28)["mmd"]))
