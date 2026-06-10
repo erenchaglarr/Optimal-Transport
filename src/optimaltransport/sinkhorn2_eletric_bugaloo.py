@@ -12,7 +12,7 @@ import jax.numpy as jnp
 from .data import get_mnist_dataset, get_labels
 from .save import load_checkpoint
 from .lossfn import torch_batch_to_jax
-from .sinkhorn import sinkhorn
+from .sinkhorn import sinkhorn, gen_cost_matrix, wasserstein
 
 @jax.jit
 def pairwise_sq_dists(x, y):
@@ -60,16 +60,6 @@ def evaluate_transport_mmd(zb, za_moved, sigma=None):
         "mmd": mmd,
     }
 
-def gen_cost_matrix(za, zb):
-    diff = za[:, None, :] - zb[None, :, :]
-    cost = jnp.sum(diff**2, axis=-1)
-    a_n = len(za)
-    b_n = len(zb)
-    a = jnp.ones(a_n) 
-    b = jnp.ones(b_n) * (b_n/a_n)
-    C = jnp.sqrt(cost)
-    return a, b, C
-
 def viz_interp(model, n_images, z, z_moved):
     fig, axes = plt.subplots(n_images, 3, figsize=(9, 3))
     for i in range(n_images):
@@ -114,21 +104,29 @@ def project_barycentric(z, P):
     z_moved = (P @ z) / row_mass
     return z_moved
 
-def gen_bad_plan(za, zb):
+def gen_bad_plan(za, zb):# used as a baseline for the real sinkhorn-generated plan
     n_a = len(za)
     n_b = len(zb)
     entry = n_b / n_a
     return jnp.ones((n_a, n_b)) * entry
 
-def mmd_for_classes(z, y, class_a, class_b):
-    filter_a = y == class_a
-    filter_b = y == class_b
-    za = z[filter_a]
-    zb = z[filter_b]
-    a, b, C = gen_cost_matrix(za, zb)
-    _,_, P = jax.jit(sinkhorn)(a,b,C)
-    za_moved = project_barycentric(zb, P)
-    return evaluate_transport_mmd(zb, za_moved, sigma=0.28)["mmd"] # needs constant sigma to make mmds comparable
+def heatmap_distance(z, y, dist):
+    distances = np.zeros((10, 10))
+    for i in range(10):
+        for j in range(10):
+            if i == j:
+                continue
+            filter_a = y == i
+            filter_b = y == j
+            za = z[filter_a]
+            zb = z[filter_b]
+            a, b, C = gen_cost_matrix(za, zb)
+            _,_, P = jax.jit(sinkhorn)(a,b,C)
+            za_moved = project_barycentric(zb, P)
+            discrepancy = dist(zb, za_moved) 
+            distances[i, j] = discrepancy
+            print(i, j, distances[i, j])
+    return distances
 
 def mmd_target_target(z, y, class_label, sigma=0.28, key=jax.random.PRNGKey(0)):
     filt = y == class_label
@@ -167,6 +165,7 @@ def embed_and_run_sinkhorn(config,  checkpoint_path=None, split="train"):
     a, b, C = gen_cost_matrix(za, zb)
     _,_, P = jax.jit(sinkhorn)(a,b,C)
     za_moved = project_barycentric(zb, P)
+<<<<<<< HEAD
     
     viz_interp(model, 3, za, za_moved)
 
@@ -186,6 +185,14 @@ def embed_and_run_sinkhorn(config,  checkpoint_path=None, split="train"):
     print(mmds)
     print(target_baselines)
     
+=======
+    viz_interp(model, 3, za, za_moved)
+    # print("wasserstein distances:")
+    # print(wasserstein_heatmap)
+    # mmd_heatmap = heatmap_distance(z, y, (lambda zb, za_moved: evaluate_transport_mmd(zb, za_moved, sigma=0.28)["mmd"]))
+    # print("mmd distances:")
+    # print(mmd_heatmap)
+>>>>>>> 5c47bd0c568f9b3a5531e3b731058f234ea35398
     
     # print(evaluate_transport_mmd(zb, za_moved))
     # print(evaluate_transport_mmd(zb, project_barycentric(zb, gen_bad_plan(za, zb))))

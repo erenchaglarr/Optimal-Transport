@@ -32,9 +32,9 @@ def sinkhorn_log(a, b, C, eps=0.1, max_iters=100, tol=1e-12):
     
     def do_iteration(i, logulogv):
         (log_u, log_v) = logulogv
-        log_u = log_a - jax.scipy.special.logsumexp(logK + log_v[None, :], axis=1) 
+        log_u = log_a - jax.scipy.special.logsumexp(logK   + log_v[None, :], axis=1) 
         log_v = log_b - jax.scipy.special.logsumexp(logK.T + log_u[None, :], axis=1) 
-        return (log_u,log_v)
+        return (log_u, log_v)
         
     (log_u, log_v) = jax.lax.fori_loop(0, max_iters, do_iteration, (log_u, log_v))
     logP = log_u[:, None] + logK + log_v[None, :] 
@@ -60,3 +60,18 @@ ex_C = jnp.array([[0, 1, 1],
 # print(c.as_text())
 # print(dir(c.runtime_executable()))
        # .execute(ex_a, ex_b, ex_C)))
+
+def gen_cost_matrix(za, zb):
+    diff = za[:, None, :] - zb[None, :, :]
+    cost = jnp.sum(diff**2, axis=-1)
+    a_n = len(za)
+    b_n = len(zb)
+    a = jnp.ones(a_n) 
+    b = jnp.ones(b_n) * (b_n/a_n)
+    C = jnp.sqrt(cost)
+    return a, b, C
+
+def wasserstein(za, zb):
+    a, b, C = gen_cost_matrix(za, zb)
+    u, v, P = jax.jit(sinkhorn_log)(a, b, C)
+    return jnp.vdot(P, C) 
