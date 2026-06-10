@@ -60,7 +60,27 @@ class AutoEncoder(eqx.Module):
     def __call__(self, x):
         z = self.encoder(x)
         return self.decoder(z)
+    
+class ImageClassifier(eqx.Module):
+    l1: eqx.nn.Linear
+    l2: eqx.nn.Linear
+    l3: eqx.nn.Linear
 
+    def __init__(self, input_shape, n_classes, hidden_dim, key):
+        in_features = math.prod(input_shape)
+        k1, k2, k3 = jax.random.split(key, 3)
+
+        self.l1 = eqx.nn.Linear(in_features, hidden_dim // 2, key=k1)
+        self.l2 = eqx.nn.Linear(hidden_dim // 2, hidden_dim // 4, key=k2)
+        self.l3 = eqx.nn.Linear(hidden_dim // 4, num_classes, key=k3)
+
+    def __call__(self, x):
+        x = jnp.ravel(x)
+        x = jax.nn.sigmoid(self.l1(z))
+        x = jax.nn.sigmoid(self.l2(x))
+        x = jax.nn.sigmoid(self.l3(x))
+        return x
+    
 def make_model(input_shape, hidden_dim, latent_dim, key):
     return AutoEncoder(
         input_shape=input_shape,
@@ -68,3 +88,4 @@ def make_model(input_shape, hidden_dim, latent_dim, key):
         latent_dim=latent_dim,
         key=key,
     )
+

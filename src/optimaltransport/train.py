@@ -31,6 +31,10 @@ def build_hparams(config, input_shape):
         "latent_dim": int(config.hyperparameters.latent_dim),
     }
 
+def build_hparams_classifier(config):
+    return {
+        "hidden_dim": int(config.classifier.hidden_dim),
+    }
 
 def make_optimizer(config):
     return optax.adam(float(config.hyperparameters.learning_rate))
@@ -275,6 +279,48 @@ def train_full_model(config):
         "final_checkpoint_path": str(final_checkpoint_path),
         "final_train_loss": float(train_loss_history[-1]),
     }
+
+def classification_loss(model, x_batch, y_batch):
+    y_hat_batch = model(x_batch)
+    return optax.losses.softmax_cross_entropy(y_hat_batch, y_batch)
+
+def make_classifier_train_step(opt):
+    @eqx.filter_jit
+    def train_step(model, opt_state, x_batch, y_batch):
+        loss, grads = eqx.filter_value_and_grad(classification_loss)(model, x_batch, y_batch)
+        updates, opt_state = opt.update(grads, opt_state, eqx.filter(model, eqx.is_array))
+        model = eqx.apply_updates(model, updates)
+        return model, opt_state, loss
+    return train_step
+
+def train_image_classifier(config):
+    key = jax.random.PRNGKey(int(config.training.seed))
+    classifier = ImageClassifier((28, 28), 10, config.classifier.hidden_dim, key)
+    optimizer = make_optimizer(config)
+    train_step = make_train_step(optimizer)
+    dataset = get_mnist_dataset(
+        data_root=config.data.root,
+        train=True,
+        download=bool(config.data.download),
+    )
+    loader = dataset(
+        dataset,
+        batch_size=int(config.hyperparameters.batch_size),
+        shuffle=True,
+        num_workers=int(config.training.num_workers),
+    )
+    for epoch_i in range(config.classifier.train_epochs):
+        for x_batch_torch, y_batch_torch in loader:
+            x_batch = torch_batch_to_jax(x_batch_torch)
+            y_batch = torch_batch_to_jay(y_batch_torch)
+            model, opt_state, loss = train_step(model, opt_state, x_batch)
+
+    checkpoint_dir = Path(config.paths.model_dir)
+    checkpoint_dir.mkdir(parents=True, exist_ok=True)
+    final_checkpoint_path = checkpoint_dir / f"{config.paths.classifier_name}-{datetime.datetime.now}"
+
+    hparams = build_hparams_classifier(config)
+    save_checkpoint(final_checkpoint_path, model, hparams)
 
 def run_training_pipeline(config):
     print("JAX devices:", jax.devices())
