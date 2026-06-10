@@ -165,34 +165,16 @@ def embed_and_run_sinkhorn(config,  checkpoint_path=None, split="train"):
     a, b, C = gen_cost_matrix(za, zb)
     _,_, P = jax.jit(sinkhorn)(a,b,C)
     za_moved = project_barycentric(zb, P)
-<<<<<<< HEAD
     
     viz_interp(model, 3, za, za_moved)
 
-    mmds = np.zeros((10, 10))
-    for i in range(10):
-        for j in range(10):
-            if i == j:
-                continue
-            mmd = mmd_for_classes(z, y, i, j)
-            print(i, j, mmd)
-            mmds[i, j] = mmd
     target_baselines = np.zeros(10)
     for i in range(10):
         target_baselines[i] = mmd_target_target(z, y, i)
         print(i, target_baselines[i])
     
-    print(mmds)
     print(target_baselines)
     
-=======
-    viz_interp(model, 3, za, za_moved)
-    # print("wasserstein distances:")
-    # print(wasserstein_heatmap)
-    # mmd_heatmap = heatmap_distance(z, y, (lambda zb, za_moved: evaluate_transport_mmd(zb, za_moved, sigma=0.28)["mmd"]))
-    # print("mmd distances:")
-    # print(mmd_heatmap)
->>>>>>> 5c47bd0c568f9b3a5531e3b731058f234ea35398
     
     # print(evaluate_transport_mmd(zb, za_moved))
     # print(evaluate_transport_mmd(zb, project_barycentric(zb, gen_bad_plan(za, zb))))
