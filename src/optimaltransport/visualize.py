@@ -163,7 +163,7 @@ def visualize_checkpoint(config, checkpoint_path=None, split="train"):
 def plot_knn_decision_regions(
     model,
     loader,
-    k=5,
+    k=10,
     standardize=True,
     grid_resolution=300,
     title="KNN decision regions in latent space",
@@ -285,7 +285,7 @@ def visualize_checkpoint(config, checkpoint_path=None, split="train"):
     plot_knn_decision_regions(
         model,
         loader,
-        k=5,
+        k=10,
         standardize=True,
         title=f"KNN decision regions ({split} split)",
     )
