@@ -7,6 +7,7 @@ import jax
 import numpy as np
 import optax
 from sklearn.model_selection import KFold
+from datetime import datetime
 
 from .save import save_checkpoint
 from .data import (
@@ -18,6 +19,10 @@ from .data import (
 from .lossfn import reconstruction_mse_loss, torch_batch_to_jax
 from .model import make_model
 
+def train_log(s):
+    print(s)
+    with open(f"cv_results_{config.hyperparameters.hidden_dim}_{config.hyperparameters.latent_dim}_{datetime.datetime.now()}", "a") as f:
+        f.write(s)
 
 def build_hparams(config, input_shape):
     return {
@@ -40,7 +45,6 @@ def make_model_and_state(config, input_shape, key, optimizer):
     )
     opt_state = optimizer.init(eqx.filter(model, eqx.is_array))
     return model, opt_state
-
 
 def make_train_step(optimizer):
     @eqx.filter_jit
