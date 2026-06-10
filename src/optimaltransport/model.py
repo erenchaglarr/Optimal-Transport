@@ -26,7 +26,6 @@ class Encoder(eqx.Module):
         x = self.l3(x)
         return x
 
-
 class Decoder(eqx.Module):
     l1: eqx.nn.Linear
     l2: eqx.nn.Linear
@@ -49,7 +48,6 @@ class Decoder(eqx.Module):
         x = jnp.reshape(x, self.output_shape)
         return x
 
-
 class AutoEncoder(eqx.Module):
     encoder: Encoder
     decoder: Decoder
@@ -62,7 +60,6 @@ class AutoEncoder(eqx.Module):
     def __call__(self, x):
         z = self.encoder(x)
         return self.decoder(z)
-
 
 def make_model(input_shape, hidden_dim, latent_dim, key):
     return AutoEncoder(
