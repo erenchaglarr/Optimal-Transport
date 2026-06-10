@@ -100,10 +100,6 @@ def arrow_plot(n_arrows, za, za_moved, zb):
             alpha=0.7,
         )
     plt.figure(figsize=(7, 7))
-    # Highlight one example point and its transported version
-    plt.scatter(z_old[0], z_old[1], s=80, marker="x", label="chosen source point")
-    plt.scatter(z_new[0], z_new[1], s=80, marker="*", label="transported point")
-    plt.scatter(z_halfway[0], z_halfway[1], s=80, marker="o", label="halfway point")
 
     plt.xlabel("latent dimension 1")
     plt.ylabel("latent dimension 2")
@@ -134,6 +130,23 @@ def mmd_for_classes(z, y, class_a, class_b):
     za_moved = project_barycentric(zb, P)
     return evaluate_transport_mmd(zb, za_moved, sigma=0.28)["mmd"] # needs constant sigma to make mmds comparable
 
+def mmd_target_target(z, y, class_label, sigma=0.28, key=jax.random.PRNGKey(0)):
+    filt = y == class_label
+    z_class = z[filt]
+
+    n = len(z_class)
+    if n < 2:
+        raise ValueError(f"Class {class_label} has fewer than 2 samples.")
+
+    perm = jax.random.permutation(key, n)
+    z_class = z_class[perm]
+
+    n_half = n // 2
+    z1 = z_class[:n_half]
+    z2 = z_class[n_half:2 * n_half]
+
+    return evaluate_transport_mmd(z1, z2, sigma=sigma)["mmd"]
+
 def embed_and_run_sinkhorn(config,  checkpoint_path=None, split="train"):
     dataset = get_mnist_dataset(
         data_root=config.data.root,
@@ -154,7 +167,7 @@ def embed_and_run_sinkhorn(config,  checkpoint_path=None, split="train"):
     a, b, C = gen_cost_matrix(za, zb)
     _,_, P = jax.jit(sinkhorn)(a,b,C)
     za_moved = project_barycentric(zb, P)
-
+    
     viz_interp(model, 3, za, za_moved)
 
     mmds = np.zeros((10, 10))
@@ -165,9 +178,15 @@ def embed_and_run_sinkhorn(config,  checkpoint_path=None, split="train"):
             mmd = mmd_for_classes(z, y, i, j)
             print(i, j, mmd)
             mmds[i, j] = mmd
-
+    target_baselines = np.zeros(10)
+    for i in range(10):
+        target_baselines[i] = mmd_target_target(z, y, i)
+        print(i, target_baselines[i])
+    
     print(mmds)
+    print(target_baselines)
+    
     
     # print(evaluate_transport_mmd(zb, za_moved))
     # print(evaluate_transport_mmd(zb, project_barycentric(zb, gen_bad_plan(za, zb))))
-    return P, za, zb, za_moved,
+    return P, za, zb, za_moved
