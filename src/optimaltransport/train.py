@@ -8,6 +8,7 @@ import numpy as np
 import optax
 from sklearn.model_selection import KFold
 from datetime import datetime
+from .model import ImageClassifier
 
 from .save import save_checkpoint
 from .data import (
@@ -312,7 +313,7 @@ def train_image_classifier(config):
     for epoch_i in range(config.classifier.train_epochs):
         for x_batch_torch, y_batch_torch in loader:
             x_batch = torch_batch_to_jax(x_batch_torch)
-            y_batch = torch_batch_to_jay(y_batch_torch)
+            y_batch = torch_batch_to_jax(y_batch_torch)
             model, opt_state, loss = train_step(model, opt_state, x_batch)
 
     checkpoint_dir = Path(config.paths.model_dir)

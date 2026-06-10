@@ -72,7 +72,7 @@ class ImageClassifier(eqx.Module):
 
         self.l1 = eqx.nn.Linear(in_features, hidden_dim // 2, key=k1)
         self.l2 = eqx.nn.Linear(hidden_dim // 2, hidden_dim // 4, key=k2)
-        self.l3 = eqx.nn.Linear(hidden_dim // 4, num_classes, key=k3)
+        self.l3 = eqx.nn.Linear(hidden_dim // 4, n_classes, key=k3)
 
     def __call__(self, x):
         x = jnp.ravel(x)
