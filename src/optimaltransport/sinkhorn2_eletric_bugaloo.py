@@ -157,7 +157,16 @@ def embed_and_run_sinkhorn(config,  checkpoint_path=None, split="train"):
 
     viz_interp(model, 3, za, za_moved)
 
-    print(mmd_for_classes(z, y, 1, 2))
+    mmds = np.zeros((10, 10))
+    for i in range(10):
+        for j in range(10):
+            if i == j:
+                continue
+            mmd = mmd_for_classes(z, y, i, j)
+            print(i, j, mmd)
+            mmds[i, j] = mmd
+
+    print(mmds)
     
     # print(evaluate_transport_mmd(zb, za_moved))
     # print(evaluate_transport_mmd(zb, project_barycentric(zb, gen_bad_plan(za, zb))))
