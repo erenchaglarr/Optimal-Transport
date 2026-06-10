@@ -17,8 +17,8 @@ training:
   num_workers: 0
 
 paths:
-  model_dir: "../models"
-  final_model_name: "latent10.eqx"
+  model_dir: "./models"
+  final_model_name: "latent2.eqx"
 
 visualization:
   num_examples: 5 
