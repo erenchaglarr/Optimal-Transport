@@ -5,8 +5,7 @@ from pathlib import Path
 
 import equinox as eqx
 import jax
-
-from .model import make_model
+from .model import make_model, ImageClassifier
 
 
 
@@ -34,3 +33,27 @@ def load_checkpoint(path):
         model = eqx.tree_deserialise_leaves(f, skeleton)
 
     return model, hparams
+
+def load_classifier_checkpoint(path):
+    path = Path(path)
+
+    with path.open("rb") as f:
+        hparams = json.loads(f.readline().decode("utf-8"))
+
+        skeleton = ImageClassifier(
+            input_shape=tuple(hparams.get("input_shape", (28, 28))),
+            n_classes=int(hparams.get("n_classes", 10)),
+            hidden_dim=int(hparams["hidden_dim"]),
+            key=jax.random.PRNGKey(0),
+        )
+
+        model = eqx.tree_deserialise_leaves(f, skeleton)
+
+    return model, hparams
+
+def build_hparams_classifier(config):
+    return {
+        "input_shape": [28, 28],
+        "n_classes": 10,
+        "hidden_dim": int(config.classifier.hidden_dim),
+    }

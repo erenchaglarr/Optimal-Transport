@@ -158,42 +158,51 @@ def heat(d, filename="a.png", cmap="viridis"):
     plt.ylabel("Source image")
     plt.savefig(filename)
     
-def embed_and_run_sinkhorn(config,  checkpoint_path=None, split="train"):
+def embed_and_run_sinkhorn(
+    config,
+    checkpoint_path=None,
+    split="train",
+    source_class=5,
+    target_class=9,
+    max_points=50,
+):
     dataset = get_mnist_dataset(
         data_root=config.data.root,
         train=(split == "train"),
         download=bool(config.data.download),
     )
+
     if checkpoint_path is None:
         checkpoint_path = Path(config.paths.model_dir) / config.paths.final_model_name
 
     model, _ = load_checkpoint(checkpoint_path)
+
     He = jnp.array(dataset.data.numpy())
     z = jax.vmap(model.encoder)(He)
     y = get_labels(dataset)
-    filter_a = y == 5
-    filter_b = y == 9
-    za = z[filter_a]
-    zb = z[filter_b]
-    a, b, C = gen_cost_matrix(za, zb)
-    pot_P, pot_time =pot_sinkhorn(a, b, C)
-    _,_, our_P = jax.jit(sinkhorn_log)(a,b,C)
-    heat(pot_P, "pot_p.png")
-    heat(our_P, "our_p.png")
-    print(pot_time)
-    za_moved = project_barycentric(zb, pot_P)
-    
-    viz_interp(model, 3, za, za_moved)
+    idx_a = np.where(np.array(y) == source_class)[0][:max_points]
+    idx_b = np.where(np.array(y) == target_class)[0][:max_points]
 
+    za = z[idx_a]
+    zb = z[idx_b]
+
+    a, b, C = gen_cost_matrix(za, zb)
+    _, _, P = jax.jit(sinkhorn)(a, b, C)
+    pot_P, pot_time = pot_sinkhorn(a, b, C)
+
+    za_moved = project_barycentric(zb, P)
+
+    viz_interp(model, 3, za, za_moved)
     arrow_plot(0, za, za_moved, zb)
 
-    # target_baselines = np.zeros(10)
-    # for i in range(10):
-    #     target_baselines[i] = mmd_target_target(z, y, i)
-    #     print(i, target_baselines[i])
+    target_baselines = np.zeros(10)
+    for i in range(10):
+        target_baselines[i] = mmd_target_target(z, y, i)
+        print(i, target_baselines[i])
     
-    # print(target_baselines)
+    print(target_baselines)
     
     # print(evaluate_transport_mmd(zb, za_moved))
     # print(evaluate_transport_mmd(zb, project_barycentric(zb, gen_bad_plan(za, zb))))
+
     return P, za, zb, za_moved
