@@ -149,7 +149,14 @@ def mmd_target_target(z, y, class_label, sigma=0.28, key=jax.random.PRNGKey(0)):
 
     return evaluate_transport_mmd(z1, z2, sigma=sigma)["mmd"]
 
-def embed_and_run_sinkhorn(config, checkpoint_path=None, split="train"):
+def embed_and_run_sinkhorn(
+    config,
+    checkpoint_path=None,
+    split="train",
+    source_class=5,
+    target_class=9,
+    max_points=50,
+):
     dataset = get_mnist_dataset(
         data_root=config.data.root,
         train=(split == "train"),
@@ -165,10 +172,6 @@ def embed_and_run_sinkhorn(config, checkpoint_path=None, split="train"):
     z = jax.vmap(model.encoder)(He)
     y = get_labels(dataset)
 
-    source_class = 5
-    target_class = 9
-    max_points = 50
-
     idx_a = np.where(np.array(y) == source_class)[0][:max_points]
     idx_b = np.where(np.array(y) == target_class)[0][:max_points]
 
@@ -176,14 +179,13 @@ def embed_and_run_sinkhorn(config, checkpoint_path=None, split="train"):
     zb = z[idx_b]
 
     a, b, C = gen_cost_matrix(za, zb)
-
     _, _, P = jax.jit(sinkhorn)(a, b, C)
 
     za_moved = project_barycentric(zb, P)
 
     viz_interp(model, 3, za, za_moved)
-
     arrow_plot(0, za, za_moved, zb)
+
     plt.figure(figsize=(6, 5))
     plt.imshow(np.array(P), cmap="Greens", aspect="auto")
     plt.colorbar(label="Transported mass")
@@ -192,6 +194,5 @@ def embed_and_run_sinkhorn(config, checkpoint_path=None, split="train"):
     plt.title(rf"Transport matrix $P$ from class {source_class} to class {target_class}")
     plt.tight_layout()
     plt.show()
-    
 
     return P, za, zb, za_moved

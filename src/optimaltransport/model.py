@@ -76,9 +76,9 @@ class ImageClassifier(eqx.Module):
 
     def __call__(self, x):
         x = jnp.ravel(x)
-        x = jax.nn.sigmoid(self.l1(z))
+        x = jax.nn.sigmoid(self.l1(x))
         x = jax.nn.sigmoid(self.l2(x))
-        x = jax.nn.sigmoid(self.l3(x))
+        x = self.l3(x)
         return x
     
 def make_model(input_shape, hidden_dim, latent_dim, key):
