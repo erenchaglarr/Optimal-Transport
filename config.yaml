@@ -4,7 +4,7 @@ data:
 
 hyperparameters:
   hidden_dim: 392
-  latent_dim: 10
+  latent_dim: 100
   learning_rate: 0.001
   batch_size: 64
   num_epochs: 50
@@ -18,7 +18,7 @@ training:
 
 paths:
   model_dir: "./models"
-  final_model_name: "latent2.eqx"
+  final_model_name: "latent100.eqx"
 
 visualization:
   num_examples: 5 
