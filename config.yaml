@@ -3,8 +3,8 @@ data:
   download: true
 
 hyperparameters:
-  hidden_dim: 392
-  latent_dim: 100
+  hidden_dim: 256
+  latent_dim: 32
   learning_rate: 0.001
   batch_size: 64
   num_epochs: 50
@@ -18,7 +18,7 @@ training:
 
 paths:
   model_dir: "./models"
-  final_model_name: "latent100.eqx"
+  final_model_name: "cifarmodel.eqx"
 
 visualization:
   num_examples: 5 
