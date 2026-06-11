@@ -1,6 +1,91 @@
 Evaluation on test split
 Checkpoint: models/latent1.eqx
-Reconstruction MSE: 0.042959
+Reconstruction MSE: 0.042960
+embedding test split ...
+generating cost matrix ... 
+evaluating linear sinkhorn jit compiled on cuda:0 ...
+evaluating log sinkhorn jit compiled on cuda:0 ...
+evaluating linear sinkhorn aot compiled on cuda:0 ...
+evaluating log sinkhorn aot compiled on cuda:0 ...
+|compilation         |impl                |device              |comptime(ns)        |runtime(ns)         |total(ns)           |xprof file          
++--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------
+|jit                 |linear              |gpu                 |                 609|           680928521|           680929130|/tmp/jax-trace-linear-jit-gpu
+|jit                 |log                 |gpu                 |                1138|           359055699|           359056837|/tmp/jax-trace-log-jit-gpu
+|aot                 |linear              |gpu                 |           155868656|            27469115|           183337771|/tmp/jax-trace-linear-aot-gpu
+|aot                 |log                 |gpu                 |           159259028|            27868996|           187128024|/tmp/jax-trace-log-aot-gpu
+
+
+Evaluation on test split
+Checkpoint: models/latent2.eqx
+Reconstruction MSE: 0.034862
+embedding test split ...
+generating cost matrix ... 
+evaluating linear sinkhorn jit compiled on cuda:0 ...
+evaluating log sinkhorn jit compiled on cuda:0 ...
+evaluating linear sinkhorn aot compiled on cuda:0 ...
+evaluating log sinkhorn aot compiled on cuda:0 ...
+|compilation         |impl                |device              |comptime(ns)        |runtime(ns)         |total(ns)           |xprof file          
++--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------
+|jit                 |linear              |gpu                 |                 557|           679422022|           679422579|/tmp/jax-trace-linear-jit-gpu
+|jit                 |log                 |gpu                 |                 658|           383426120|           383426778|/tmp/jax-trace-log-jit-gpu
+|aot                 |linear              |gpu                 |           157079063|            27014408|           184093471|/tmp/jax-trace-linear-aot-gpu
+|aot                 |log                 |gpu                 |           176892201|            28417945|           205310146|/tmp/jax-trace-log-aot-gpu
+
+
+Evaluation on test split
+Checkpoint: models/latent3.eqx
+Reconstruction MSE: 0.029481
+embedding test split ...
+generating cost matrix ... 
+evaluating linear sinkhorn jit compiled on cuda:0 ...
+evaluating log sinkhorn jit compiled on cuda:0 ...
+evaluating linear sinkhorn aot compiled on cuda:0 ...
+evaluating log sinkhorn aot compiled on cuda:0 ...
+|compilation         |impl                |device              |comptime(ns)        |runtime(ns)         |total(ns)           |xprof file          
++--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------
+|jit                 |linear              |gpu                 |                 523|           689141227|           689141750|/tmp/jax-trace-linear-jit-gpu
+|jit                 |log                 |gpu                 |                 790|           371275471|           371276261|/tmp/jax-trace-log-jit-gpu
+|aot                 |linear              |gpu                 |           153922958|            28341978|           182264936|/tmp/jax-trace-linear-aot-gpu
+|aot                 |log                 |gpu                 |           174203730|            27507410|           201711140|/tmp/jax-trace-log-aot-gpu
+
+
+Evaluation on test split
+Checkpoint: models/latent5.eqx
+Reconstruction MSE: 0.021930
+embedding test split ...
+generating cost matrix ... 
+evaluating linear sinkhorn jit compiled on cuda:0 ...
+evaluating log sinkhorn jit compiled on cuda:0 ...
+evaluating linear sinkhorn aot compiled on cuda:0 ...
+evaluating log sinkhorn aot compiled on cuda:0 ...
+|compilation         |impl                |device              |comptime(ns)        |runtime(ns)         |total(ns)           |xprof file          
++--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------
+|jit                 |linear              |gpu                 |                 583|           760613569|           760614152|/tmp/jax-trace-linear-jit-gpu
+|jit                 |log                 |gpu                 |                 611|           360606346|           360606957|/tmp/jax-trace-log-jit-gpu
+|aot                 |linear              |gpu                 |           158785898|            27063738|           185849636|/tmp/jax-trace-linear-aot-gpu
+|aot                 |log                 |gpu                 |           165400277|            27476483|           192876760|/tmp/jax-trace-log-aot-gpu
+
+
+Evaluation on test split
+Checkpoint: models/latent10.eqx
+Reconstruction MSE: 0.013053
+embedding test split ...
+generating cost matrix ... 
+evaluating linear sinkhorn jit compiled on cuda:0 ...
+evaluating log sinkhorn jit compiled on cuda:0 ...
+evaluating linear sinkhorn aot compiled on cuda:0 ...
+evaluating log sinkhorn aot compiled on cuda:0 ...
+|compilation         |impl                |device              |comptime(ns)        |runtime(ns)         |total(ns)           |xprof file          
++--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------
+|jit                 |linear              |gpu                 |                 652|           679061676|           679062328|/tmp/jax-trace-linear-jit-gpu
+|jit                 |log                 |gpu                 |                1312|           372634862|           372636174|/tmp/jax-trace-log-jit-gpu
+|aot                 |linear              |gpu                 |           156553184|            27435981|           183989165|/tmp/jax-trace-linear-aot-gpu
+|aot                 |log                 |gpu                 |           159905946|            27680010|           187585956|/tmp/jax-trace-log-aot-gpu
+
+
+Evaluation on test split
+Checkpoint: models/latent1.eqx
+Reconstruction MSE: 0.042960
 embedding test split ...
 generating cost matrix ... 
 evaluating linear sinkhorn jit compiled on TFRT_CPU_0 ...
@@ -9,10 +94,10 @@ evaluating linear sinkhorn aot compiled on TFRT_CPU_0 ...
 evaluating log sinkhorn aot compiled on TFRT_CPU_0 ...
 |compilation         |impl                |device              |comptime(ns)        |runtime(ns)         |total(ns)           |xprof file          
 +--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------
-|jit                 |linear              |cpu                 |                 541|           170429834|           170430375|/tmp/jax-trace-linear-jit-cpu
-|jit                 |log                 |cpu                 |                 500|           179379000|           179379500|/tmp/jax-trace-log-jit-cpu
-|aot                 |linear              |cpu                 |            83881375|            12867250|            96748625|/tmp/jax-trace-linear-aot-cpu
-|aot                 |log                 |cpu                 |            81741750|            17759500|            99501250|/tmp/jax-trace-log-aot-cpu
+|jit                 |linear              |cpu                 |                 561|           204901775|           204902336|/tmp/jax-trace-linear-jit-cpu
+|jit                 |log                 |cpu                 |                1137|           221515629|           221516766|/tmp/jax-trace-log-jit-cpu
+|aot                 |linear              |cpu                 |            71301313|            15258577|            86559890|/tmp/jax-trace-linear-aot-cpu
+|aot                 |log                 |cpu                 |            72405229|            25543412|            97948641|/tmp/jax-trace-log-aot-cpu
 
 
 Evaluation on test split
@@ -26,15 +111,15 @@ evaluating linear sinkhorn aot compiled on TFRT_CPU_0 ...
 evaluating log sinkhorn aot compiled on TFRT_CPU_0 ...
 |compilation         |impl                |device              |comptime(ns)        |runtime(ns)         |total(ns)           |xprof file          
 +--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------
-|jit                 |linear              |cpu                 |                 666|           165047792|           165048458|/tmp/jax-trace-linear-jit-cpu
-|jit                 |log                 |cpu                 |                 583|           182644125|           182644708|/tmp/jax-trace-log-jit-cpu
-|aot                 |linear              |cpu                 |            88919083|            12225542|           101144625|/tmp/jax-trace-linear-aot-cpu
-|aot                 |log                 |cpu                 |            91755833|            17747667|           109503500|/tmp/jax-trace-log-aot-cpu
+|jit                 |linear              |cpu                 |                 555|           210039662|           210040217|/tmp/jax-trace-linear-jit-cpu
+|jit                 |log                 |cpu                 |                1137|           225281918|           225283055|/tmp/jax-trace-log-jit-cpu
+|aot                 |linear              |cpu                 |            74113676|            15518294|            89631970|/tmp/jax-trace-linear-aot-cpu
+|aot                 |log                 |cpu                 |            79058100|            26065487|           105123587|/tmp/jax-trace-log-aot-cpu
 
 
 Evaluation on test split
 Checkpoint: models/latent3.eqx
-Reconstruction MSE: 0.029481
+Reconstruction MSE: 0.029482
 embedding test split ...
 generating cost matrix ... 
 evaluating linear sinkhorn jit compiled on TFRT_CPU_0 ...
@@ -43,11 +128,10 @@ evaluating linear sinkhorn aot compiled on TFRT_CPU_0 ...
 evaluating log sinkhorn aot compiled on TFRT_CPU_0 ...
 |compilation         |impl                |device              |comptime(ns)        |runtime(ns)         |total(ns)           |xprof file          
 +--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------
-|jit                 |linear              |cpu                 |                 541|           169258709|           169259250|/tmp/jax-trace-linear-jit-cpu
-|jit                 |log                 |cpu                 |                 583|           178796042|           178796625|/tmp/jax-trace-log-jit-cpu
-|aot                 |linear              |cpu                 |            84779125|            12803166|            97582291|/tmp/jax-trace-linear-aot-cpu
-|aot                 |log                 |cpu                 |            84057917|            18791167|           102849084|/tmp/jax-trace-log-aot-cpu
-
+|jit                 |linear              |cpu                 |                 510|           223113341|           223113851|/tmp/jax-trace-linear-jit-cpu
+|jit                 |log                 |cpu                 |                 709|           233950572|           233951281|/tmp/jax-trace-log-jit-cpu
+|aot                 |linear              |cpu                 |            74873919|            15487790|            90361709|/tmp/jax-trace-linear-aot-cpu
+|aot                 |log                 |cpu                 |           100082004|            26696556|           126778560|/tmp/jax-trace-log-aot-cpu
 
 Evaluation on test split
 Checkpoint: models/latent5.eqx
@@ -60,10 +144,11 @@ evaluating linear sinkhorn aot compiled on TFRT_CPU_0 ...
 evaluating log sinkhorn aot compiled on TFRT_CPU_0 ...
 |compilation         |impl                |device              |comptime(ns)        |runtime(ns)         |total(ns)           |xprof file          
 +--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------
-|jit                 |linear              |cpu                 |                 500|           172721041|           172721541|/tmp/jax-trace-linear-jit-cpu
-|jit                 |log                 |cpu                 |                 583|           174330667|           174331250|/tmp/jax-trace-log-jit-cpu
-|aot                 |linear              |cpu                 |            86866833|            12068209|            98935042|/tmp/jax-trace-linear-aot-cpu
-|aot                 |log                 |cpu                 |            83314291|            17767375|           101081666|/tmp/jax-trace-log-aot-cpu
+|jit                 |linear              |cpu                 |                 542|           211626718|           211627260|/tmp/jax-trace-linear-jit-cpu
+|jit                 |log                 |cpu                 |                 739|           237045213|           237045952|/tmp/jax-trace-log-jit-cpu
+|aot                 |linear              |cpu                 |            86708261|            14935242|           101643503|/tmp/jax-trace-linear-aot-cpu
+|aot                 |log                 |cpu                 |            94815102|            25690264|           120505366|/tmp/jax-trace-log-aot-cpu
+
 
 Evaluation on test split
 Checkpoint: models/latent10.eqx
@@ -76,7 +161,7 @@ evaluating linear sinkhorn aot compiled on TFRT_CPU_0 ...
 evaluating log sinkhorn aot compiled on TFRT_CPU_0 ...
 |compilation         |impl                |device              |comptime(ns)        |runtime(ns)         |total(ns)           |xprof file          
 +--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------
-|jit                 |linear              |cpu                 |                 708|           167587500|           167588208|/tmp/jax-trace-linear-jit-cpu
-|jit                 |log                 |cpu                 |                 584|           177438958|           177439542|/tmp/jax-trace-log-jit-cpu
-|aot                 |linear              |cpu                 |            84639208|            12633333|            97272541|/tmp/jax-trace-linear-aot-cpu
-|aot                 |log                 |cpu                 |            86882125|            17797791|           104679916|/tmp/jax-trace-log-aot-cpu
+|jit                 |linear              |cpu                 |                 638|           230537178|           230537816|/tmp/jax-trace-linear-jit-cpu
+|jit                 |log                 |cpu                 |                 542|           249783147|           249783689|/tmp/jax-trace-log-jit-cpu
+|aot                 |linear              |cpu                 |            75591598|            15300088|            90891686|/tmp/jax-trace-linear-aot-cpu
+|aot                 |log                 |cpu                 |            91923405|            26099259|           118022664|/tmp/jax-trace-log-aot-cpu
