@@ -100,7 +100,7 @@ def arrow_plot(n_arrows, za, za_moved, zb):
     plt.legend()
     plt.title("Sinkhorn transport: digit 4 moved toward digit 7")
     plt.axis("equal")
-    plt.savefig("4to7.png")
+    # plt.savefig("4to7.png")
     
 def project_barycentric(z, P):
     row_mass = jnp.sum(P, axis=1, keepdims=True)
@@ -149,38 +149,49 @@ def mmd_target_target(z, y, class_label, sigma=0.28, key=jax.random.PRNGKey(0)):
 
     return evaluate_transport_mmd(z1, z2, sigma=sigma)["mmd"]
 
-def embed_and_run_sinkhorn(config,  checkpoint_path=None, split="train"):
+def embed_and_run_sinkhorn(config, checkpoint_path=None, split="train"):
     dataset = get_mnist_dataset(
         data_root=config.data.root,
         train=(split == "train"),
         download=bool(config.data.download),
     )
+
     if checkpoint_path is None:
         checkpoint_path = Path(config.paths.model_dir) / config.paths.final_model_name
 
     model, _ = load_checkpoint(checkpoint_path)
+
     He = jnp.array(dataset.data.numpy())
     z = jax.vmap(model.encoder)(He)
     y = get_labels(dataset)
-    filter_a = y == 1
-    filter_b = y == 2
-    za = z[filter_a]
-    zb = z[filter_b]
+
+    source_class = 5
+    target_class = 9
+    max_points = 50
+
+    idx_a = np.where(np.array(y) == source_class)[0][:max_points]
+    idx_b = np.where(np.array(y) == target_class)[0][:max_points]
+
+    za = z[idx_a]
+    zb = z[idx_b]
+
     a, b, C = gen_cost_matrix(za, zb)
-    _,_, P = jax.jit(sinkhorn)(a,b,C)
+
+    _, _, P = jax.jit(sinkhorn)(a, b, C)
+
     za_moved = project_barycentric(zb, P)
-    
+
     viz_interp(model, 3, za, za_moved)
 
     arrow_plot(0, za, za_moved, zb)
+    plt.figure(figsize=(6, 5))
+    plt.imshow(np.array(P), cmap="Greens", aspect="auto")
+    plt.colorbar(label="Transported mass")
+    plt.xlabel(f"Target samples from class {target_class}")
+    plt.ylabel(f"Source samples from class {source_class}")
+    plt.title(rf"Transport matrix $P$ from class {source_class} to class {target_class}")
+    plt.tight_layout()
+    plt.show()
+    
 
-    target_baselines = np.zeros(10)
-    for i in range(10):
-        target_baselines[i] = mmd_target_target(z, y, i)
-        print(i, target_baselines[i])
-    
-    print(target_baselines)
-    
-    # print(evaluate_transport_mmd(zb, za_moved))
-    # print(evaluate_transport_mmd(zb, project_barycentric(zb, gen_bad_plan(za, zb))))
     return P, za, zb, za_moved
