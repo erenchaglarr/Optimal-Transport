@@ -26,6 +26,7 @@ dependencies = [
     "matplotlib>=3.10.8",
     "optax>=0.2.7",
     "pandas>=3.0.3",
+    "pot[all,backend-jax,jax-backend]>=0.9.6.post1",
     "scikit-learn>=1.8.0",
     "torch==2.6.0",
     "torchvision>=0.21.0",
