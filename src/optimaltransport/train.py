@@ -4,6 +4,7 @@ from pathlib import Path
 
 import equinox as eqx
 import jax
+import jax.numpy as jnp
 import numpy as np
 import optax
 from sklearn.model_selection import KFold
@@ -20,10 +21,29 @@ from .data import (
 from .lossfn import reconstruction_mse_loss, torch_batch_to_jax
 from .model import make_model
 
-def train_log(s):
-    print(s)
-    with open(f"cv_results_{config.hyperparameters.hidden_dim}_{config.hyperparameters.latent_dim}_{datetime.datetime.now()}", "a") as f:
-        f.write(s)
+
+def make_train_logger(config):
+    log_dir = Path(config.paths.results_dir)
+    log_dir.mkdir(parents=True, exist_ok=True)
+
+    timestamp = datetime.now()
+
+    log_path = log_dir / (
+        f"cv_results_"
+        f"hidden_{config.hyperparameters.hidden_dim}_"
+        f"latent_{config.hyperparameters.latent_dim}_"
+        f"{timestamp}.txt"
+    )
+
+    def train_log(s):
+        s = str(s)
+        print(s)
+
+        with open(log_path, "a", encoding="utf-8") as f:
+            f.write(s)
+            f.write("\n")
+
+    return train_log
 
 def build_hparams(config, input_shape):
     return {
@@ -72,6 +92,7 @@ def eval_step(model, x_batch):
 
 
 def cross_validate(config):
+    train_log = make_train_logger(config)
     dataset = get_mnist_dataset(
         data_root=config.data.root,
         train=True,
@@ -97,7 +118,7 @@ def cross_validate(config):
         splitter.split(np.arange(len(dataset))),
         start=1,
     ):
-        print(f"\n========== Fold {fold}/{int(config.folds.num_folds)} ==========")
+        train_log(f"\n========== Fold {fold}/{int(config.folds.num_folds)} ==========")
 
         train_loader, val_loader = make_fold_loaders(
             dataset=dataset,
@@ -137,7 +158,7 @@ def cross_validate(config):
             train_loss_history.append(mean_train_loss)
             val_loss_history.append(mean_val_loss)
 
-            print(
+            train_log(
                 f"Fold {fold:02d} | "
                 f"Epoch {epoch + 1:02d}/{int(config.hyperparameters.num_epochs)} | "
                 f"Train: {mean_train_loss:.6f} | "
@@ -282,46 +303,106 @@ def train_full_model(config):
     }
 
 def classification_loss(model, x_batch, y_batch):
-    y_hat_batch = model(x_batch)
-    return optax.losses.softmax_cross_entropy(y_hat_batch, y_batch)
+    logits = jax.vmap(model)(x_batch)
 
-def make_classifier_train_step(opt):
+    loss = optax.losses.softmax_cross_entropy_with_integer_labels(
+        logits,
+        y_batch,
+    )
+
+    return loss.mean()
+
+
+def make_classifier_train_step(optimizer):
     @eqx.filter_jit
     def train_step(model, opt_state, x_batch, y_batch):
-        loss, grads = eqx.filter_value_and_grad(classification_loss)(model, x_batch, y_batch)
-        updates, opt_state = opt.update(grads, opt_state, eqx.filter(model, eqx.is_array))
+        loss, grads = eqx.filter_value_and_grad(classification_loss)(
+            model,
+            x_batch,
+            y_batch,
+        )
+
+        updates, opt_state = optimizer.update(
+            grads,
+            opt_state,
+            eqx.filter(model, eqx.is_array),
+        )
+
         model = eqx.apply_updates(model, updates)
+
         return model, opt_state, loss
+
     return train_step
 
 def train_image_classifier(config):
     key = jax.random.PRNGKey(int(config.training.seed))
-    classifier = ImageClassifier((28, 28), 10, config.classifier.hidden_dim, key)
+
+    model = ImageClassifier(
+        (28, 28),
+        10,
+        int(config.classifier.hidden_dim),
+        key,
+    )
+
     optimizer = make_optimizer(config)
-    train_step = make_train_step(optimizer)
+    opt_state = optimizer.init(eqx.filter(model, eqx.is_array))
+
+    train_step = make_classifier_train_step(optimizer)
+
     dataset = get_mnist_dataset(
         data_root=config.data.root,
         train=True,
         download=bool(config.data.download),
     )
-    loader = dataset(
+
+    loader = make_loader(
         dataset,
         batch_size=int(config.hyperparameters.batch_size),
         shuffle=True,
         num_workers=int(config.training.num_workers),
     )
-    for epoch_i in range(config.classifier.train_epochs):
+
+    for epoch_i in range(int(config.classifier.train_epochs)):
+        epoch_losses = []
+
         for x_batch_torch, y_batch_torch in loader:
             x_batch = torch_batch_to_jax(x_batch_torch)
             y_batch = torch_batch_to_jax(y_batch_torch)
-            model, opt_state, loss = train_step(model, opt_state, x_batch)
+
+            x_batch = jnp.squeeze(x_batch, axis=1)
+            y_batch = y_batch.astype(jnp.int32)
+
+            model, opt_state, loss = train_step(
+                model,
+                opt_state,
+                x_batch,
+                y_batch,
+            )
+
+            epoch_losses.append(float(loss))
+
+        mean_loss = float(np.mean(epoch_losses))
+        print(f"Classifier epoch {epoch_i + 1}: loss = {mean_loss:.6f}")
 
     checkpoint_dir = Path(config.paths.model_dir)
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
-    final_checkpoint_path = checkpoint_dir / f"{config.paths.classifier_name}-{datetime.datetime.now}"
+
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+    final_checkpoint_path = (
+        checkpoint_dir / f"{config.paths.classifier_name}-{timestamp}"
+    )
 
     hparams = build_hparams_classifier(config)
     save_checkpoint(final_checkpoint_path, model, hparams)
+
+    print(f"Classifier checkpoint saved to: {final_checkpoint_path}")
+
+    return {
+        "model": model,
+        "final_checkpoint_path": str(final_checkpoint_path),
+        "final_train_loss": mean_loss,
+    }
 
 def run_training_pipeline(config):
     print("JAX devices:", jax.devices())

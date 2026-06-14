@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 from functools import partial
-
 import jax
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import matplotlib.pyplot as plt
@@ -12,7 +11,8 @@ import jax.numpy as jnp
 from .data import get_mnist_dataset, get_labels
 from .save import load_checkpoint
 from .lossfn import torch_batch_to_jax
-from .sinkhorn import sinkhorn, gen_cost_matrix, wasserstein
+from .sinkhorn import sinkhorn, gen_cost_matrix, wasserstein, sinkhorn_log
+from .eval_pot_perf import pot_sinkhorn
 
 @jax.jit
 def pairwise_sq_dists(x, y):
@@ -100,7 +100,7 @@ def arrow_plot(n_arrows, za, za_moved, zb):
     plt.legend()
     plt.title("Sinkhorn transport: digit 4 moved toward digit 7")
     plt.axis("equal")
-    # plt.savefig("4to7.png")
+    plt.show()
     
 def project_barycentric(z, P):
     row_mass = jnp.sum(P, axis=1, keepdims=True)
@@ -149,7 +149,23 @@ def mmd_target_target(z, y, class_label, sigma=0.28, key=jax.random.PRNGKey(0)):
 
     return evaluate_transport_mmd(z1, z2, sigma=sigma)["mmd"]
 
-def embed_and_run_sinkhorn(config, checkpoint_path=None, split="train"):
+def heat(d, filename="a.png", cmap="viridis"):
+    plt.figure(figsize=(8, 5))
+    plt.imshow(d, cmap=cmap, aspect="auto")
+    plt.colorbar(label="P")
+    plt.title("P")
+    plt.xlabel("Target image")
+    plt.ylabel("Source image")
+    plt.savefig(filename)
+    
+def embed_and_run_sinkhorn(
+    config,
+    checkpoint_path=None,
+    split="train",
+    source_class=5,
+    target_class=9,
+    max_points=50,
+):
     dataset = get_mnist_dataset(
         data_root=config.data.root,
         train=(split == "train"),
@@ -164,11 +180,6 @@ def embed_and_run_sinkhorn(config, checkpoint_path=None, split="train"):
     He = jnp.array(dataset.data.numpy())
     z = jax.vmap(model.encoder)(He)
     y = get_labels(dataset)
-
-    source_class = 5
-    target_class = 9
-    max_points = 50
-
     idx_a = np.where(np.array(y) == source_class)[0][:max_points]
     idx_b = np.where(np.array(y) == target_class)[0][:max_points]
 
@@ -176,22 +187,22 @@ def embed_and_run_sinkhorn(config, checkpoint_path=None, split="train"):
     zb = z[idx_b]
 
     a, b, C = gen_cost_matrix(za, zb)
-
     _, _, P = jax.jit(sinkhorn)(a, b, C)
+    pot_P, pot_time = pot_sinkhorn(a, b, C)
 
     za_moved = project_barycentric(zb, P)
 
     viz_interp(model, 3, za, za_moved)
-
     arrow_plot(0, za, za_moved, zb)
-    plt.figure(figsize=(6, 5))
-    plt.imshow(np.array(P), cmap="Greens", aspect="auto")
-    plt.colorbar(label="Transported mass")
-    plt.xlabel(f"Target samples from class {target_class}")
-    plt.ylabel(f"Source samples from class {source_class}")
-    plt.title(rf"Transport matrix $P$ from class {source_class} to class {target_class}")
-    plt.tight_layout()
-    plt.show()
+
+    target_baselines = np.zeros(10)
+    for i in range(10):
+        target_baselines[i] = mmd_target_target(z, y, i)
+        print(i, target_baselines[i])
     
+    print(target_baselines)
+    
+    # print(evaluate_transport_mmd(zb, za_moved))
+    # print(evaluate_transport_mmd(zb, project_barycentric(zb, gen_bad_plan(za, zb))))
 
     return P, za, zb, za_moved
