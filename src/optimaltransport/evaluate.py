@@ -5,15 +5,16 @@ from pathlib import Path
 import equinox as eqx
 import numpy as np
 
-from .data import get_mnist_dataset, make_loader
+from .data import get_mnist_dataset, make_loader, get_labels
 from .lossfn import reconstruction_mse_only, torch_batch_to_jax
 from .KNN_classifier import evaluate_knn_on_eqx_checkpoints
 from .eval_perf import eval_perf, print_report
 import jax
 import jax.numpy as jnp
 
+from .sinkhorn import gen_cost_matrix, sinkhorn
 from .save import load_checkpoint, load_classifier_checkpoint
-from .sinkhorn2_eletric_bugaloo import embed_and_run_sinkhorn
+from .sinkhorn2_eletric_bugaloo import project_barycentric
 
 @eqx.filter_jit
 def eval_step(model, x_batch):
@@ -135,15 +136,13 @@ def _class_distribution(preds, n_classes=10):
         for i in range(n_classes)
     }
 
-
 def evaluate_transportplans_with_classifier(
     config,
     classifier_checkpoint_path,
     autoencoder_checkpoint_path=None,
-    split="train",
-    source_class=5,
-    target_class=9,
-    max_points=50,
+    split="test",
+    max_points=None,
+    n_classes=10,
 ):
     if autoencoder_checkpoint_path is None:
         autoencoder_checkpoint_path = (
@@ -156,49 +155,92 @@ def evaluate_transportplans_with_classifier(
 
     autoencoder, _ = load_checkpoint(autoencoder_checkpoint_path)
     classifier, _ = load_classifier_checkpoint(classifier_checkpoint_path)
-    
-    P, za, zb, za_moved = embed_and_run_sinkhorn(
-    config=config,
-    checkpoint_path=autoencoder_checkpoint_path,
-    split=split,
-    source_class=source_class,
-    target_class=target_class,
-    max_points=max_points,
-)
 
-    transported_images = jax.vmap(autoencoder.decoder)(za_moved)
+    dataset = get_mnist_dataset(
+        data_root=config.data.root,
+        train=(split == "train"),
+        download=bool(config.data.download),
+    )
 
-    classifier_outputs = jax.vmap(classifier)(transported_images)
-    preds = jnp.argmax(classifier_outputs, axis=1)
+    He = jnp.array(dataset.data.numpy())
+    z = jax.vmap(autoencoder.encoder)(He)
+    y = np.array(get_labels(dataset))
 
-    target_hits = preds == int(target_class)
-    target_rate = float(jnp.mean(target_hits))
+    accuracy_matrix = np.full((n_classes, n_classes), np.nan)
+    n_images_matrix = np.zeros((n_classes, n_classes), dtype=int)
 
-    distribution = _class_distribution(preds, n_classes=10)
+    all_target_rates = []
 
-    print("\n========== Transport evaluation with classifier ==========")
+    print("\n========== Average transport evaluation with classifier ==========")
     print(f"Autoencoder checkpoint: {autoencoder_checkpoint_path}")
     print(f"Classifier checkpoint: {classifier_checkpoint_path}")
-    print(f"Target class: {target_class}")
-    print(f"Number of transported images: {len(preds)}")
-    print(f"Fraction classified as target class {target_class}: {target_rate:.4f}")
+    print(f"Split: {split}")
 
-    print("\nPredicted class distribution:")
-    for cls, stats in distribution.items():
-        print(
-            f"class {cls}: "
-            f"{stats['count']} images "
-            f"({100 * stats['fraction']:.2f}%)"
-        )
+    for source_class in range(n_classes):
+        for target_class in range(n_classes):
+            if source_class == target_class:
+                continue
+
+            idx_a = np.where(y == source_class)[0]
+            idx_b = np.where(y == target_class)[0]
+
+            if max_points is not None:
+                idx_a = idx_a[:max_points]
+                idx_b = idx_b[:max_points]
+
+            za = z[idx_a]
+            zb = z[idx_b]
+
+            a, b, C = gen_cost_matrix(za, zb)
+            _, _, P = jax.jit(sinkhorn)(a, b, C)
+
+            za_moved = project_barycentric(zb, P)
+
+            transported_images = jax.vmap(autoencoder.decoder)(za_moved)
+
+            classifier_outputs = jax.vmap(classifier)(transported_images)
+            preds = jnp.argmax(classifier_outputs, axis=1)
+
+            target_hits = preds == int(target_class)
+            target_rate = float(jnp.mean(target_hits))
+
+            accuracy_matrix[source_class, target_class] = target_rate
+            n_images_matrix[source_class, target_class] = len(preds)
+            all_target_rates.append(target_rate)
+
+            print(
+                f"{source_class} -> {target_class}: "
+                f"{target_rate:.4f} "
+                f"({int(jnp.sum(target_hits))}/{len(preds)})"
+            )
+
+    mean_accuracy = float(np.mean(all_target_rates))
+
+    per_source_accuracy = np.nanmean(accuracy_matrix, axis=1)
+    per_target_accuracy = np.nanmean(accuracy_matrix, axis=0)
+
+    print("\nAccuracy matrix:")
+    print(accuracy_matrix)
+
+    print("\nAverage target accuracy over all source-target pairs:")
+    print(f"{mean_accuracy:.4f}")
+
+    print("\nAverage accuracy by source class:")
+    for cls, acc in enumerate(per_source_accuracy):
+        print(f"source class {cls}: {acc:.4f}")
+
+    print("\nAverage accuracy by target class:")
+    for cls, acc in enumerate(per_target_accuracy):
+        print(f"target class {cls}: {acc:.4f}")
 
     return {
         "autoencoder_checkpoint_path": str(autoencoder_checkpoint_path),
         "classifier_checkpoint_path": str(classifier_checkpoint_path),
-        "target_class": int(target_class),
-        "n_images": int(len(preds)),
-        "target_rate": target_rate,
-        "predictions": np.array(preds).tolist(),
-        "class_distribution": distribution,
-        "transported_images": transported_images,
-        "transport_plan": P,
+        "split": split,
+        "mean_accuracy": mean_accuracy,
+        "accuracy_matrix": accuracy_matrix,
+        "n_images_matrix": n_images_matrix,
+        "per_source_accuracy": per_source_accuracy,
+        "per_target_accuracy": per_target_accuracy,
     }
+    

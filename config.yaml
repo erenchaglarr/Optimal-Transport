@@ -15,14 +15,10 @@ folds:
 training:
   seed: 42
   num_workers: 0
-classifier:
-  hidden_dim: 392
-  train_epochs: 50
+
 paths:
   model_dir: "./models"
-  final_model_name: "latent50.eqx"
-  classifier_name: "classifier"
-  results_dir: results
+  final_model_name: "latent20.eqx"
 
 visualization:
   num_examples: 5 
