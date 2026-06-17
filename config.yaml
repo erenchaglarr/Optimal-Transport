@@ -4,7 +4,7 @@ data:
 
 hyperparameters:
   hidden_dim: 256
-  latent_dim: 32
+  latent_dim: 50
   learning_rate: 0.001
   batch_size: 64
   num_epochs: 50
@@ -20,8 +20,9 @@ classifier:
   train_epochs: 50
 paths:
   model_dir: "./models"
-  final_model_name: "latent2.eqx"
+  final_model_name: "latent50.eqx"
   classifier_name: "classifier"
+  results_dir: results
 
 visualization:
   num_examples: 5 

@@ -22,3 +22,9 @@ def reconstruction_mse_loss(model, x_batch, latent_l2_weight=1e-3):
     total_loss = rec_loss + latent_l2_weight * latent_l2
 
     return total_loss
+
+def reconstruction_mse_only(model, x_batch):
+    z_batch = jax.vmap(model.encoder)(x_batch)
+    x_hat_batch = jax.vmap(model.decoder)(z_batch)
+
+    return jnp.mean((x_hat_batch - x_batch) ** 2)

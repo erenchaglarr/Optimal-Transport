@@ -6,7 +6,7 @@ import equinox as eqx
 import numpy as np
 
 from .data import get_mnist_dataset, make_loader
-from .lossfn import reconstruction_mse_loss, torch_batch_to_jax
+from .lossfn import reconstruction_mse_only, torch_batch_to_jax
 from .KNN_classifier import evaluate_knn_on_eqx_checkpoints
 from .eval_perf import eval_perf, print_report
 import jax
@@ -17,7 +17,7 @@ from .sinkhorn2_eletric_bugaloo import embed_and_run_sinkhorn
 
 @eqx.filter_jit
 def eval_step(model, x_batch):
-    return reconstruction_mse_loss(model, x_batch)
+    return reconstruction_mse_only(model, x_batch)
 
 def evaluate_model(model, loader):
     losses = []
