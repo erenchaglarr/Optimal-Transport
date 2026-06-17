@@ -200,18 +200,6 @@ def plot_transport_outputs_across_dims(
     show_halfway=True,
     save_path=None,
 ):
-    """
-    Compact report-style visualization.
-
-    Shows the same source input image transported using different latent dimensions.
-
-    If show_halfway=True:
-        Row 1: halfway transported outputs
-        Row 2: fully transported outputs
-
-    If show_halfway=False:
-        Single row: fully transported outputs only
-    """
 
     dataset = get_mnist_dataset(
         data_root=config.data.root,
