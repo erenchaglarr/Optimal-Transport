@@ -424,6 +424,9 @@ def embed_and_run_sinkhorn(
     3: "models/latent3.eqx",
     5: "models/latent5.eqx",
     10: "models/latent10.eqx",
+    20: "models/latent20.eqx",
+    30: "models/latent30.eqx",
+    50: "models/latent50.eqx",
 }
 
     plot_transport_outputs_across_dims(
