@@ -3,8 +3,8 @@ data:
   download: true
 
 hyperparameters:
-  hidden_dim: 256
-  latent_dim: 50
+  hidden_dim: 392
+  latent_dim: 20
   learning_rate: 0.001
   batch_size: 64
   num_epochs: 50
