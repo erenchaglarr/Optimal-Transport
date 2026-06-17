@@ -12,6 +12,10 @@ from .evaluate import (
 from .visualize import visualize_checkpoint
 from .train import run_training_pipeline, train_image_classifier
 from .sinkhorn2_eletric_bugaloo import embed_and_run_sinkhorn
+from .eval_variance import (
+    evaluate_transport_variance_across_dims,
+    summarize_variance_results_by_dim,
+)
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -30,9 +34,11 @@ def parse_args():
             "all",
             "sinkhorn",
             "transport_classifier",
+            "variance",
         ],
         default="all",
     )
+    
 
     parser.add_argument("--checkpoint", type=str, default=None)
     parser.add_argument("--classifier-checkpoint", type=str, default=None)
@@ -47,6 +53,21 @@ def parse_args():
     parser.add_argument("--source-class", type=int, default=5)
     parser.add_argument("--target-class", type=int, default=9)
     parser.add_argument("--max-points", type=int, default=50)
+    
+    parser.add_argument(
+    "--latent-dims",
+    nargs="+",
+    type=int,
+    default=[1, 2, 3, 5, 10],
+    help="Latent dimensions to evaluate, e.g. --latent-dims 1 2 3 5 10 20 30 50",
+)
+
+    parser.add_argument(
+    "--variance-csv",
+    type=str,
+    default="transport_variance_across_dims.csv",
+    help="CSV file for saving transported/target variance diagnostics.",
+)
 
     return parser.parse_args()
 
@@ -117,7 +138,27 @@ def main():
             checkpoint_paths=checkpoint_paths,
             export_path=Path(config.paths.model_dir) / "knn_eqx_checkpoint_results.csv",
         )
+    elif args.mode == "variance":
+        checkpoint_paths = {
+        dim: Path(config.paths.model_dir) / f"latent{dim}.eqx"
+        for dim in args.latent_dims
+    }
 
+    print("\n========== Transport variance diagnostics ==========")
+    print(f"Split: {args.split}")
+    print(f"Latent dimensions: {args.latent_dims}")
+    print(f"Max points: {args.max_points}")
+    print(f"Output CSV: {args.variance_csv}")
+
+    variance_results = evaluate_transport_variance_across_dims(
+        config=config,
+        checkpoint_paths=checkpoint_paths,
+        split=args.split,
+        max_points=args.max_points,
+        export_csv_path=args.variance_csv,
+    )
+
+    summarize_variance_results_by_dim(variance_results)
 
 
 
