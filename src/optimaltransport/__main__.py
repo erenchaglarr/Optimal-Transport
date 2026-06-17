@@ -108,8 +108,6 @@ def main():
             classifier_checkpoint_path=args.classifier_checkpoint,
             autoencoder_checkpoint_path=checkpoint_path,
             split=args.split,
-            source_class=args.source_class,
-            target_class=args.target_class,
             max_points=args.max_points,
         )
 

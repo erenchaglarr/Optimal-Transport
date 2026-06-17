@@ -432,8 +432,8 @@ def embed_and_run_sinkhorn(
     plot_transport_outputs_across_dims(
     config=config,
     checkpoint_paths=checkpoint_paths,
-    source_class=1,
-    target_class=5,
+    source_class=0,
+    target_class=7,
     split="test",
     visual_rank=0,
     show_halfway=False,
