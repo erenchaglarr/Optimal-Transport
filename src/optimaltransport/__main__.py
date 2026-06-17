@@ -138,27 +138,27 @@ def main():
             checkpoint_paths=checkpoint_paths,
             export_path=Path(config.paths.model_dir) / "knn_eqx_checkpoint_results.csv",
         )
-    elif args.mode == "variance":
+    if args.mode == "variance":
         checkpoint_paths = {
         dim: Path(config.paths.model_dir) / f"latent{dim}.eqx"
         for dim in args.latent_dims
     }
 
-    print("\n========== Transport variance diagnostics ==========")
-    print(f"Split: {args.split}")
-    print(f"Latent dimensions: {args.latent_dims}")
-    print(f"Max points: {args.max_points}")
-    print(f"Output CSV: {args.variance_csv}")
+        print("\n========== Transport variance diagnostics ==========")
+        print(f"Split: {args.split}")
+        print(f"Latent dimensions: {args.latent_dims}")
+        print(f"Max points: {args.max_points}")
+        print(f"Output CSV: {args.variance_csv}")
 
-    variance_results = evaluate_transport_variance_across_dims(
-        config=config,
-        checkpoint_paths=checkpoint_paths,
-        split=args.split,
-        max_points=args.max_points,
-        export_csv_path=args.variance_csv,
-    )
+        variance_results = evaluate_transport_variance_across_dims(
+            config=config,
+            checkpoint_paths=checkpoint_paths,
+            split=args.split,
+            max_points=args.max_points,
+            export_csv_path=args.variance_csv,
+        )
 
-    summarize_variance_results_by_dim(variance_results)
+        summarize_variance_results_by_dim(variance_results)
 
 
 
