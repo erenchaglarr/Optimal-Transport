@@ -425,9 +425,9 @@ def embed_and_run_sinkhorn(
     He = jnp.array(dataset.data.numpy())
     z = jax.vmap(model.encoder)(He)
     y = get_labels(dataset)
-    discrepancies(config, He, y, ["latent20", "latent30", "latent50", "latent100"],
+    """ discrepancies(config, He, y, ["latent20", "latent30", "latent50", "latent100"],
                   [("MMD", lambda za, zb: evaluate_transport_mmd(za, zb, sigma=0.28)["mmd"]),
-                   ("Wasserstein", normalized_wasserstein)])
+                   ("Wasserstein", normalized_wasserstein)]) """
 
 
     idx_a = np.where(np.array(y) == source_class)[0]
@@ -460,8 +460,8 @@ def embed_and_run_sinkhorn(
     plot_transport_outputs_across_dims(
     config=config,
     checkpoint_paths=checkpoint_paths,
-    source_class=0,
-    target_class=7,
+    source_class=source_class,
+    target_class=target_class,
     split="test",
     visual_rank=0,
     show_halfway=False,
