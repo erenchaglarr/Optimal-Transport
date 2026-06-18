@@ -7,11 +7,12 @@ from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import matplotlib.pyplot as plt
 import numpy as np
 import jax.numpy as jnp
+from itertools import product
 
 from .data import get_mnist_dataset, get_labels
 from .save import load_checkpoint
 from .lossfn import torch_batch_to_jax
-from .sinkhorn import sinkhorn, gen_cost_matrix, wasserstein, sinkhorn_log
+from .sinkhorn import sinkhorn, gen_cost_matrix, normalized_wasserstein, sinkhorn_log
 from .eval_pot_perf import pot_sinkhorn
 
 @jax.jit
@@ -350,7 +351,6 @@ def heatmap_distance(z, y, dist):
             za_moved = project_barycentric(zb, P)
             discrepancy = dist(zb, za_moved) 
             distances[i, j] = discrepancy
-            print(i, j, distances[i, j])
     return distances
 
 def mmd_target_target(z, y, class_label, sigma=0.28, key=jax.random.PRNGKey(0)):
@@ -374,11 +374,35 @@ def heat(d, filename="a.png", cmap="viridis"):
     plt.figure(figsize=(8, 5))
     plt.imshow(d, cmap=cmap, aspect="auto")
     plt.colorbar(label="P")
-    plt.title("P")
+    plt.title("MMD")
     plt.xlabel("Target image")
     plt.ylabel("Source image")
     plt.savefig(filename)
+
+def distance_table(distances, distance_name, title, filename):
+    plt.figure(figsize=(8, 5))
+    plt.imshow(distances, cmap="viridis", aspect="auto")
+    plt.colorbar(label=f"{distance_name}")
+    plt.title(title)
+    plt.xlabel("Target digit")
+    plt.ylabel("Source digit")
+    plt.savefig(filename)
     
+def discrepancies(config, x, y, models, distances): 
+    for model_name, (dist_name, dist) in product(models, distances):
+        print(f"running with {model_name}, {dist_name}")
+        print("loading model ...")
+        checkpoint_path = Path(config.paths.model_dir) / (model_name + ".eqx")
+        model, _ = load_checkpoint(checkpoint_path)
+        print("embedding ...")
+        z = jax.vmap(model.encoder)(x)
+        print("calculating distances")
+        A = heatmap_distance(z, y, dist)
+        print(A)
+        heatmap_filename =f"distance-heatmap-{model_name}-{dist_name}"
+        distance_table(A, dist_name, f"{dist_name} distances", heatmap_filename)
+        print(f"heatmap saved in {heatmap_filename}")
+
 def embed_and_run_sinkhorn(
     config,
     checkpoint_path=None,
@@ -401,6 +425,10 @@ def embed_and_run_sinkhorn(
     He = jnp.array(dataset.data.numpy())
     z = jax.vmap(model.encoder)(He)
     y = get_labels(dataset)
+    discrepancies(config, He, y, ["latent20", "latent30", "latent50", "latent100"],
+                  [("MMD", lambda za, zb: evaluate_transport_mmd(za, zb, sigma=0.28)["mmd"]),
+                   ("Wasserstein", normalized_wasserstein)])
+
 
     idx_a = np.where(np.array(y) == source_class)[0]
     idx_b = np.where(np.array(y) == target_class)[0]
@@ -449,3 +477,4 @@ def embed_and_run_sinkhorn(
     )
 
     return P, za, zb, za_moved
+ 

@@ -53,6 +53,13 @@ def gen_cost_matrix(za, zb):
     C = jnp.sqrt(cost)
     return a, b, C
 
+def normalized_wasserstein(za, zb):
+    a, b, C = gen_cost_matrix(za, zb)
+    na = len(za)
+    a, b = a/na, b/na
+    u, v, P = jax.jit(sinkhorn_log)(a, b, C)
+    return jnp.vdot(P, C) 
+
 def wasserstein(za, zb):
     a, b, C = gen_cost_matrix(za, zb)
     u, v, P = jax.jit(sinkhorn_log)(a, b, C)
