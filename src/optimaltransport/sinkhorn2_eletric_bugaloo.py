@@ -463,7 +463,7 @@ def embed_and_run_sinkhorn(
     source_class=source_class,
     target_class=target_class,
     split="test",
-    visual_rank=0,
+    visual_rank=10,
     show_halfway=False,
     save_path="transport_1_to_5_outputs_only.png",
 )
