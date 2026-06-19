@@ -37,12 +37,6 @@ def sinkhorn_log(a, b, C, eps=0.1, max_iters=100, tol=1e-12):
     # P /= P.sum() 
     return jnp.exp(log_u),jnp.exp(log_v), P
 
-ex_a = jnp.array([1, 1, 0])
-ex_b = jnp.array([0, 1, 1])
-ex_C = jnp.array([[0, 1, 1],
-                  [1, 0, 1],
-                  [1, 1, 0]])
-
 def gen_cost_matrix(za, zb):
     diff = za[:, None, :] - zb[None, :, :]
     cost = jnp.sum(diff**2, axis=-1)

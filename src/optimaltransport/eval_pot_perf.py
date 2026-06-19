@@ -21,4 +21,3 @@ def pot_sinkhorn(a, b, C, eps=0.1):
     P_our = our_sinkhorn(a, b, C, eps=eps)
     our_end = perf_counter_ns()
     return P_POT, POT_end - POT_start, P_our, our_end - our_start
-

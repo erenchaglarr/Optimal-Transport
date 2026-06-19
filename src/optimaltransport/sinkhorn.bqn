@@ -3,7 +3,7 @@ MP←+˝∘×⎉1‿∞
 Diag←{𝕩×Id ≠𝕩}
 t←(3‿3 ⥊ ↕ 9)
 
-Sinkhorn ← {a‿b‿c‿eps‿iters:
+Sinkhorn←{a‿b‿c‿eps‿iters:
   k←(-c) (⋆÷) eps
   n←⊑≢a
   m←⊑≢b
@@ -12,7 +12,7 @@ Sinkhorn ← {a‿b‿c‿eps‿iters:
   u‿v←{un‿vn:
     un1←a÷(k MP vn)
     vn1←b÷((⍉k) MP un1)
-    # lam←(⌊un1) (+÷2) (⌈ vn1)
+    # lam←(⌊un1) (+÷2) (⌈ vn1) 
     lam ← 1
     (un1×lam)‿(vn1÷lam)
   }⍟iters u0‿v0
@@ -21,6 +21,7 @@ Sinkhorn ← {a‿b‿c‿eps‿iters:
   #•Show k
   #(Diag u) MP k MP (Diag v)
 }
+
 NaiveLogSH←Sinkhorn⌾(⋆⁼((↕3)⊑))
 
 points_class_a←[1‿1, 1‿2, 2‿1, 2‿2]
