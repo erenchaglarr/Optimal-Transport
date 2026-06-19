@@ -32,7 +32,7 @@ def make_train_logger(config):
         f"cv_results_"
         f"hidden_{config.hyperparameters.hidden_dim}_"
         f"latent_{config.hyperparameters.latent_dim}_"
-        f"{timestamp}.txt"
+        f"{timestamp.strftime('%s')}.txt"
     )
 
     def train_log(s):
