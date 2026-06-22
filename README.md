@@ -20,9 +20,24 @@ Though this is not recommended as this project have only been tested using UV sy
 
 
 ## Project structure
+usage: __main__.py [-h] [--config CONFIG] [--mode {train,train_classifier,evaluate,knn,visualize,all,sinkhorn,transport_classifier,variance}]
+                   [--checkpoint CHECKPOINT] [--classifier-checkpoint CLASSIFIER_CHECKPOINT] [--split {train,test}] [--source-class SOURCE_CLASS]
+                   [--target-class TARGET_CLASS] [--max-points MAX_POINTS] [--latent-dims LATENT_DIMS [LATENT_DIMS ...]] [--variance-csv VARIANCE_CSV]
 
-
-````
+options:
+  -h, --help            show this help message and exit
+  --config CONFIG
+  --mode {train,train_classifier,evaluate,knn,visualize,all,sinkhorn,transport_classifier,variance}
+  --checkpoint CHECKPOINT
+  --classifier-checkpoint CLASSIFIER_CHECKPOINT
+  --split {train,test}
+  --source-class SOURCE_CLASS
+  --target-class TARGET_CLASS
+  --max-points MAX_POINTS
+  --latent-dims LATENT_DIMS [LATENT_DIMS ...]
+                        Latent dimensions to evaluate, e.g. --latent-dims 1 2 3 5 10 20 30 50
+  --variance-csv VARIANCE_CSV
+                        CSV file for saving transported/target variance diagnostics.
 
 Created using [mlops_template](https://github.com/SkafteNicki/mlops_template),
 a [cookiecutter template](https://github.com/cookiecutter/cookiecutter) for getting
